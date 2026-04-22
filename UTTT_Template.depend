@@ -1,0 +1,8 @@
+# depslib dependency file v1.0
+1776865139 source:c:\users\user\documents\esilv\poo\uttt_template\main.cpp
+	<iostream>
+	"main.h"
+
+1776865139 c:\users\user\documents\esilv\poo\uttt_template\main.h
+	<string>
+
