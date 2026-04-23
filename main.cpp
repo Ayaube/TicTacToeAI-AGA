@@ -3,13 +3,68 @@
 #include "main.h"
 using namespace std;
 
-bool estPlein(vector<vector<int>>& plateau, int debutL, int debutC) {
-    for (int i = 0; i < 3; i++)
-        for (int j = 0; j < 3; j++)
-            if (plateau[debutL+i][debutC+j] == 0)
-                cout << "plein" << endl;
-                return false;
-    return true;
+void isFull(vector<vector<int>> &plateau, vector<int> &vfull){
+    for (vector<int> grille:plateau){
+            if((grille[0] == 1) && (grille[4] == 1) && (grille[8] == 1)){
+                cout << "Le joueur a gagné" << endl;
+            }
+            else if((grille[0] == -1) && (grille[4] == -1) && (grille[8] == -1)){
+                cout << "L'IA a gagné" << endl;
+            }
+
+            else if((grille[6] == 1) && (grille[4] == 1) && (grille[2] == 1)){
+                cout << "Le joueur a gagné" << endl;
+            }
+            else if((grille[6] == -1) && (grille[4] == -1) && (grille[2] == -1)){
+                cout << "L'IA a gagné" << endl;
+            }
+
+
+            else if((grille[0] == 1) && (grille[3] == 1) && (grille[6] == 1)){
+                cout << "Le joueur a gagné" << endl;
+            }
+            else if((grille[0] == -1) && (grille[3] == -1) && (grille[6] == -1)){
+                cout << "L'IA a gagné" << endl;
+            }
+
+            else if((grille[1] == 1) && (grille[4] == 1) && (grille[7] == 1)){
+                cout << "Le joueur a gagné" << endl;
+            }
+            else if((grille[1] == -1) && (grille[4] == -1) && (grille[7] == -1)){
+                cout << "L'IA a gagné" << endl;
+            }
+
+            else if((grille[2] == 1) && (grille[5] == 1) && (grille[8] == 1)){
+                cout << "Le joueur a gagné" << endl;
+            }
+            else if((grille[2] == -1) && (grille[5] == -1) && (grille[8] == -1)){
+                cout << "L'IA a gagné" << endl;
+            }
+
+
+            else if((grille[0] == 1) && (grille[1] == 1) && (grille[2] == 1)){
+                cout << "Le joueur a gagné" << endl;
+            }
+            else if((grille[0] == -1) && (grille[1] == -1) && (grille[2] == -1)){
+                cout << "L'IA a gagné" << endl;
+            }
+
+            else if((grille[3] == 1) && (grille[4] == 1) && (grille[5] == 1)){
+                cout << "Le joueur a gagné" << endl;
+            }
+            else if((grille[3] == -1) && (grille[4] == -1) && (grille[5] == -1)){
+                cout << "L'IA a gagné" << endl;
+            }
+
+            else if((grille[6] == 1) && (grille[7] == 1) && (grille[8] == 1)){
+                cout << "Le joueur a gagné" << endl;
+            }
+            else if((grille[6] == -1) && (grille[7] == -1) && (grille[8] == -1)){
+                cout << "L'IA a gagné" << endl;
+            }
+
+
+    }
 }
 
 int main()
@@ -19,7 +74,7 @@ int main()
 
     int size = 9;
     vector<vector<int>> plateau(size, vector<int>(size, 0));
-
+    vector<int> vfull(3,0);
 
     while (!game.isAllGameFinish())
     {
@@ -35,7 +90,7 @@ int main()
             std::cerr << "IA move " << gameMove.row << " " << gameMove.col << std::endl;
             plateau[gameMove.row][gameMove.col] = -1;
 
-            estPlein(plateau,gameMove.row,gameMove.col);
+            isFull(plateau,vfull);
 
             if(plateau[1][1]==0){
                 myMove.row=1;
@@ -82,7 +137,7 @@ int main()
             std::cerr << "Send move " << myMove.row << " " << myMove.col << std::endl;
             game.setMove(myMove);
             plateau[myMove.row][myMove.col] = 1;
-            estPlein(plateau,myMove.row,myMove.col);
+            isFull(plateau,vfull);
         }
 
         for (vector<int> grille:plateau){
