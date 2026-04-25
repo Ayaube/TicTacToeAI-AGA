@@ -41,6 +41,10 @@
 			<Add option="allegro-5.2.dll" />
 			<Add library="./libUTTTLib.a" />
 		</Linker>
+		<Unit filename="Jeux.h" />
+		<Unit filename="Joueur.h" />
+		<Unit filename="Plateau.cpp" />
+		<Unit filename="Plateau.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="main.h" />
 		<Extensions />
