@@ -95,15 +95,26 @@ Sur macOS, le linking natif peut echouer sans toolchain compatible.
 - l'IA joue bien (coups et evaluations visibles dans les logs)
 - base de code assez claire pour la soutenance
 
+## Resultats de tests (VM `win-dev`, 2026-04-30)
+
+Campagnes lancees en mode `arena` via tache interactive, puis parsing des logs.
+
+| Niveau | Parties detectees | Victoires (PLAYER) | Defaites (IA) | Egalites | Taux de victoire (hors egalites) | Validation 80% |
+|---|---:|---:|---:|---:|---:|---|
+| `MEDIUM_1` | 100 | 98 | 0 | 2 | 100.00% | OK |
+| `MEDIUM_2` | 100 | 15 | 83 | 2 | 15.31% | KO |
+
+Note: dans les logs, les egalites apparaissent comme `IA AND PLAYER`.
+
 ## Ce qui ne va pas encore
 
 - execution SSH directe impossible (GUI Allegro requise)
 - mode Arena semble enchaîner beaucoup de parties meme avec `nbGames` faible
-- pas encore de tableau final de resultats par niveau (taux de victoire)
+- `MEDIUM_2` est loin de l'objectif de 80%
 
 ## Reste a faire
 
-- lancer des campagnes de test propres par niveau (`MEDIUM_1`, puis `MEDIUM_2`)
 - extraire des stats claires depuis les logs (wins/loss/draw + pourcentage hors egalites)
 - verifier stabilite en mode `DEBUG` et `ARENA`
+- ameliorer l'IA pour monter le taux en `MEDIUM_2` (evaluation + gestion tactique)
 - ajouter un `.gitignore` pour `bin/`, `obj/`, executables et fichiers temporaires
