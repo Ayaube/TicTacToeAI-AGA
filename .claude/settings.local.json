@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(g++ -O2 -std=c++17 -c main.cpp -o /dev/null)",
+      "Bash(g++ -O2 -std=c++17 -c Plateau.cpp -o /dev/null)"
+    ]
+  }
+}
