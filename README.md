@@ -113,6 +113,16 @@ Conclusion provisoire: `step1` reste la meilleure variante testee a date (`21.65
 Le `step3b` (ANY_BOARD seul) n'apporte pas de gain net par rapport a `step1`, donc
 pas d'integration de `Killer Moves` a ce stade.
 
+## Iteration en cours (Palier 1)
+
+- `m2 step4 retire filtres racine`:
+  - suppression des regles binaires a la racine dans `prochainMove`
+  - objectif: decision pilotee par l'evaluation continue
+- `m2 step4 eval continue meta anyboard` (a benchmarker):
+  - poids explicites centre > coins > bords sur la meta-grille
+  - renforcement des menaces meta a 2-en-ligne
+  - bonus/malus `ANY_BOARD` adouci
+
 ## Ce qui ne va pas encore
 
 - execution SSH directe impossible (GUI Allegro requise)
