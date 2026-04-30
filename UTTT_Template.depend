@@ -33,3 +33,26 @@
 	<vector>
 	"main.h"
 
+1777536644 source:c:\users\antoi\esilv\s2\poo cc++ (maeiin360925)\tictactoeai-aga\main.cpp
+	<iostream>
+	<vector>
+	"main.h"
+	"Plateau.h"
+
+1776866528 c:\users\antoi\esilv\s2\poo cc++ (maeiin360925)\tictactoeai-aga\main.h
+	<string>
+
+1777540713 c:\users\antoi\esilv\s2\poo cc++ (maeiin360925)\tictactoeai-aga\plateau.h
+	<array>
+	<vector>
+	"main.h"
+
+1777536978 source:c:\users\antoi\esilv\s2\poo cc++ (maeiin360925)\tictactoeai-aga\plateau.cpp
+	<iostream>
+	<vector>
+	<limits>
+	<algorithm>
+	<chrono>
+	"Plateau.h"
+	"main.h"
+
