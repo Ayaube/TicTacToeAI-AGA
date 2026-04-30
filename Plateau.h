@@ -37,6 +37,7 @@ private:
 
     int  jouerCoup(int row, int col, int joueur);
     void annulerCoup(int row, int col, int ancienEtat);
+    int  etatSousPlateau(int si, int sj);
 
     // Version sans allocation : ecrit dans un buffer fourni
     int getCoupsLegauxFast(const GameMove& last, GameMove buf[MAX_MOVES]);

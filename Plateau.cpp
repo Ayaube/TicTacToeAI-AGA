@@ -60,6 +60,9 @@ void Plateau::verifPlateau() {
             m_e[i][j] = r;
             cout << (r==1 ? "Joueur" : "IA")
                  << " gagne sous-plateau (" << i << "," << j << ")\n";
+        } else if (estPlein(i, j)) {
+            // 2 = sous-plateau termine sur un nul
+            m_e[i][j] = 2;
         }
     }
 }
@@ -96,12 +99,21 @@ int Plateau::jouerCoup(int row, int col, int joueur) {
     m_g[row][col] = joueur;
     int si = row/3, sj = col/3;
     int ancien = m_e[si][sj];
-    if (ancien == 0) { int g = gagnant(si*3, sj*3); if (g) m_e[si][sj] = g; }
+    if (ancien == 0) {
+        m_e[si][sj] = etatSousPlateau(si, sj);
+    }
     return ancien;
 }
 void Plateau::annulerCoup(int row, int col, int ancienEtat) {
     m_g[row][col] = 0;
     m_e[row/3][col/3] = ancienEtat;
+}
+
+int Plateau::etatSousPlateau(int si, int sj) {
+    int g = gagnant(si*3, sj*3);
+    if (g != 0) return g;
+    if (estPlein(si, sj)) return 2;
+    return 0;
 }
 
 // ============================================================
