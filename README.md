@@ -18,7 +18,7 @@ Cette branche est le nouveau point de depart technique:
 - port manuel limite de correctifs utiles depuis `gabin`
 - code garde volontairement simple et lisible
 
-Points actuellement en place:
+Points en place:
 
 - gestion propre des coups legaux selon `lastMove`
 - minimax + alpha-beta
@@ -33,7 +33,7 @@ Points actuellement en place:
 - `Plateau.h/.cpp`: logique UTTT, generation des coups, evaluation, minimax
 - `main.h`: interface fournie par la lib du template
 
-## Lancement
+## Lancement (usage applicatif)
 
 Le programme accepte des arguments:
 
@@ -54,14 +54,56 @@ Exemples:
 ./UTTT_Template debug hard1 10 1 AGA
 ```
 
-## Remarque environnement
+## Build Windows (VM `win-dev`)
+
+Commande qui fonctionne sur la VM:
+
+```bash
+g++ -std=c++17 -O2 -fno-lto main.cpp Plateau.cpp -L. -lUTTTLib allegro_font-5.2.dll allegro_ttf-5.2.dll allegro_image-5.2.dll allegro_primitives-5.2.dll allegro-5.2.dll -o ia_local.exe
+```
+
+Note:
+- sans `-fno-lto`, la compilation echoue (mismatch LTO avec `libUTTTLib.a`)
+
+## Execution via SSH (VM)
+
+Execution directe en SSH:
+- ne marche pas avec Allegro (`Failed to create display!`)
+
+Execution qui marche:
+- lancer l'exe via une tache planifiee interactive (`schtasks /IT`)
+- rediriger la sortie vers un fichier log
+
+Exemple:
+
+```bat
+schtasks /Create /TN UTTT_Run /SC ONCE /ST 23:59 /TR "cmd /c cd /d C:\Users\ayoub\projets\Projet\TicTacToeAI-AGA && ia_local.exe arena med1 1 0 AGA > C:\Users\ayoub\projets\Projet\TicTacToeAI-AGA\run_arena.log 2>&1" /RU ayoub /IT /F
+schtasks /Run /TN UTTT_Run
+```
+
+Puis lecture du log:
+- `C:\Users\ayoub\projets\Projet\TicTacToeAI-AGA\run_arena.log`
+
+## Remarques environnement
 
 Le template fourni est centre Windows/MinGW (`.dll`, `.exe`, `libUTTTLib.a` au format COFF).
 Sur macOS, le linking natif peut echouer sans toolchain compatible.
 
-## Suite du travail
+## Ce qui va
 
-- consolider les tests Arena avec stats par niveau
-- verifier proprement `MEDIUM_1` puis `MEDIUM_2`
-- optimiser de facon progressive sans complexifier inutilement le code
-- nettoyer les artefacts de build versionnes (`bin/`, `obj/`) via `.gitignore`
+- la branche `ayoub` compile sur la VM Windows cible
+- l'IA joue bien (coups et evaluations visibles dans les logs)
+- base de code assez claire pour la soutenance
+
+## Ce qui ne va pas encore
+
+- execution SSH directe impossible (GUI Allegro requise)
+- mode Arena semble enchaîner beaucoup de parties meme avec `nbGames` faible
+- pas encore de tableau final de resultats par niveau (taux de victoire)
+
+## Reste a faire
+
+- lancer des campagnes de test propres par niveau (`MEDIUM_1`, puis `MEDIUM_2`)
+- extraire des stats claires depuis les logs (wins/loss/draw + pourcentage hors egalites)
+- verifier stabilite en mode `DEBUG` et `ARENA`
+- ajouter un `.gitignore` pour `bin/`, `obj/`, executables et fichiers temporaires
