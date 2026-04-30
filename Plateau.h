@@ -21,6 +21,12 @@ class Plateau{
         void verifPlateau();
         void prochainMove(GameMove& myMove, GameMove& lastMove);
         bool estCondamne(int row, int col);
+        int minimax(int profondeur, int alpha, int beta, bool estMax, int cibleL, int cibleC);
+        int evaluerPlateau();
+        int evaluerSousPlateau(int startR, int startC);
+        std::vector<std::pair<int,int>> getCoupsValides(int cibleL, int cibleC);
+        int prioriteCoup(int r, int c, int joueur);
+        int etatSousPlateau(int br, int bc);
 
 };
 
