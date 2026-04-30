@@ -441,28 +441,6 @@ void Plateau::prochainMove(GameMove& myMove, GameMove& lastMove) {
     int n = (int)coups.size();
     if (n == 0) return;
 
-    // Etape tactique 1:
-    // 1) jouer le gain meta immediat s'il existe
-    // 2) filtrer les coups qui donnent un gain meta immediat a l'adversaire
-    for (const GameMove& c : coups) {
-        if (coupDonneVictoireMeta(c, 1)) {
-            myMove = c;
-            return;
-        }
-    }
-
-    vector<GameMove> coupsSurs;
-    coupsSurs.reserve(coups.size());
-    for (const GameMove& c : coups) {
-        if (!adversairePeutGagnerMetaAuProchainTour(c)) {
-            coupsSurs.push_back(c);
-        }
-    }
-    if (!coupsSurs.empty()) {
-        coups.swap(coupsSurs);
-        n = (int)coups.size();
-    }
-
     g_debut  = steady_clock::now();
     myMove   = coups[0]; // meilleur par defaut (tri heuristique)
 
