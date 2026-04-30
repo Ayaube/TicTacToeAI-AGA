@@ -10,13 +10,13 @@ Coder une IA en C++ (POO) capable d'affronter les IA du sujet sur plusieurs nive
 
 Validation d'un niveau: au moins 80% de victoires en mode Arena (hors egalites).
 
-## Etat de la branche `ayoub`
+## Etat de la branche `ayoub_medium2`
 
-Cette branche est le nouveau point de depart technique:
+Cette branche sert aux tests iteratifs pour battre `MEDIUM_2`:
 
-- base fusionnee depuis `Antoine`
-- port manuel limite de correctifs utiles depuis `gabin`
-- code garde volontairement simple et lisible
+- base issue de `ayoub`
+- changements appliques par etapes (un commit par etape)
+- objectif: progresser sans ajouter de complexite inutile
 
 Points en place:
 
@@ -91,7 +91,7 @@ Sur macOS, le linking natif peut echouer sans toolchain compatible.
 
 ## Ce qui va
 
-- la branche `ayoub` compile sur la VM Windows cible
+- la branche `ayoub_medium2` compile sur la VM Windows cible
 - l'IA joue bien (coups et evaluations visibles dans les logs)
 - base de code assez claire pour la soutenance
 
@@ -99,22 +99,25 @@ Sur macOS, le linking natif peut echouer sans toolchain compatible.
 
 Campagnes lancees en mode `arena` via tache interactive, puis parsing des logs.
 
-| Niveau | Parties detectees | Victoires (PLAYER) | Defaites (IA) | Egalites | Taux de victoire (hors egalites) | Validation 80% |
-|---|---:|---:|---:|---:|---:|---|
-| `MEDIUM_1` | 100 | 98 | 0 | 2 | 100.00% | OK |
-| `MEDIUM_2` | 100 | 15 | 83 | 2 | 15.31% | KO |
+| Niveau | Variante | Parties detectees | Victoires (PLAYER) | Defaites (IA) | Egalites | Taux de victoire (hors egalites) | Validation 80% |
+|---|---|---:|---:|---:|---:|---:|---|
+| `MEDIUM_1` | base `ayoub` | 100 | 98 | 0 | 2 | 100.00% | OK |
+| `MEDIUM_2` | base `ayoub` | 100 | 15 | 83 | 2 | 15.31% | KO |
+| `MEDIUM_2` | step1 `m2 step1 tactique simple` | 100 | 21 | 76 | 3 | 21.65% | KO |
+| `MEDIUM_2` | step2 `m2 step2 filtre tactique` | 100 | 17 | 81 | 1 | 17.35% | KO |
 
 Note: dans les logs, les egalites apparaissent comme `IA AND PLAYER`.
+Conclusion provisoire: `step1` reste meilleur que `step2`.
 
 ## Ce qui ne va pas encore
 
 - execution SSH directe impossible (GUI Allegro requise)
 - mode Arena semble enchaîner beaucoup de parties meme avec `nbGames` faible
 - `MEDIUM_2` est loin de l'objectif de 80%
+- `step2` n'a pas ameliore le score par rapport a `step1`
 
 ## Reste a faire
 
-- extraire des stats claires depuis les logs (wins/loss/draw + pourcentage hors egalites)
 - verifier stabilite en mode `DEBUG` et `ARENA`
-- ameliorer l'IA pour monter le taux en `MEDIUM_2` (evaluation + gestion tactique)
+- repartir de `step1` et tester un `step3` simple
 - ajouter un `.gitignore` pour `bin/`, `obj/`, executables et fichiers temporaires
