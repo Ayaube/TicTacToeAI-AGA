@@ -51,7 +51,7 @@ void Plateau::verifPlateau(){
     for (int i = 0; i < 3; i++) {
         for (int j = 0; j < 3; j++) {
             if (m_etat[i][j] != 0)
-                continue;  // déjà condamné, on skip
+                continue;  // dï¿½jï¿½ condamnï¿½, on skip
             int result = gagnant(i * 3, j * 3);
             if (result != 0) {
                 m_etat[i][j] = result;
@@ -63,11 +63,20 @@ void Plateau::verifPlateau(){
 }
 
 void Plateau::prochainMove(GameMove &myMove, GameMove &lastMove){
+    if (lastMove.row == -1) {
+        for (int r = 0; r < 9; r++)
+            for (int c = 0; c < 9; c++)
+                if (getCase(r, c) == 0 && !estCondamne(r, c)) {
+                    myMove.row = r; myMove.col = c; return;
+                }
+        return;
+    }
+
     int cibleL = (lastMove.row % 3) * 3;
     int cibleC = (lastMove.col % 3) * 3;
     bool found = false;
 
-    // Si le sous-plateau cible n'est pas condamné, jouer dedans
+    // Si le sous-plateau cible n'est pas condamnï¿½, jouer dedans
     if (!estCondamne(cibleL, cibleC)) {
         // 1. Peut-on gagner ce sous-plateau ? (aligner 3)
         for (int joueur : {1, -1}) {
@@ -82,7 +91,7 @@ void Plateau::prochainMove(GameMove &myMove, GameMove &lastMove){
                     setCase(r, c, 0); // annuler
 
                     if (result == 1) {
-                        // On peut gagner, on joue là
+                        // On peut gagner, on joue lï¿½
                         myMove.row = r;
                         myMove.col = c;
                         return;
@@ -97,28 +106,28 @@ void Plateau::prochainMove(GameMove &myMove, GameMove &lastMove){
             }
         }
 
-        // 2. Si on a trouvé un blocage, on le joue
+        // 2. Si on a trouvï¿½ un blocage, on le joue
         if (found) return;
 
-        // 3. Sinon, choisir stratégiquement
-        //    Éviter d'envoyer l'IA dans un bon sous-plateau
+        // 3. Sinon, choisir stratï¿½giquement
+        //    ï¿½viter d'envoyer l'IA dans un bon sous-plateau
         int ordre[][2] = {{1,1}, {0,0}, {0,2}, {2,0}, {2,2}, {0,1}, {1,0}, {1,2}, {2,1}};
         int meilleurScore = -999;
         for (auto& pos : ordre) {
             int r = cibleL + pos[0];
             int c = cibleC + pos[1];
             if (getCase(r, c) == 0) {
-                // Où est-ce qu'on envoie l'IA ?
+                // Oï¿½ est-ce qu'on envoie l'IA ?
                 int envoyeL = (r % 3);
                 int envoyeC = (c % 3);
                 int score = 0;
 
-                // Bonus si on envoie l'IA dans un sous-plateau condamné (elle joue libre)
+                // Bonus si on envoie l'IA dans un sous-plateau condamnï¿½ (elle joue libre)
                 // Malus si on l'envoie dans un sous-plateau qu'elle domine
                 if (m_etat[envoyeL][envoyeC] != 0) {
-                    score -= 10; // éviter de lui donner le choix libre
+                    score -= 10; // ï¿½viter de lui donner le choix libre
                 } else {
-                    // Compter nos pièces vs les siennes dans le sous-plateau cible
+                    // Compter nos piï¿½ces vs les siennes dans le sous-plateau cible
                     int nosP = 0, sesP = 0;
                     for (int i = 0; i < 3; i++)
                         for (int j = 0; j < 3; j++) {
@@ -126,7 +135,7 @@ void Plateau::prochainMove(GameMove &myMove, GameMove &lastMove){
                             if (val == 1) nosP++;
                             if (val == -1) sesP++;
                         }
-                    score = nosP - sesP; // on préfère l'envoyer où on domine
+                    score = nosP - sesP; // on prï¿½fï¿½re l'envoyer oï¿½ on domine
                 }
 
                 // Bonus centre
@@ -142,7 +151,7 @@ void Plateau::prochainMove(GameMove &myMove, GameMove &lastMove){
         }
     }
 
-    // Si condamné ou plein, jouer n'importe où
+    // Si condamnï¿½ ou plein, jouer n'importe oï¿½
     if (!found) {
         for (int r = 0; r < 9; r++) {
             for (int c = 0; c < 9; c++) {

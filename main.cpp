@@ -1,4 +1,4 @@
-#include <iostream>
+﻿#include <iostream>
 #include <vector>
 #include "main.h"
 #include "Plateau.h"
@@ -8,7 +8,7 @@ using namespace std;
 int main()
 {
     // Game initialization
-    game.initialize(10, Level::MEDIUM_1, Mode::DEBUG, false, "Pseudo");
+    game.initialize(10, Level::MEDIUM_1, Mode::ARENA, false, "Pseudo");
 
     int size = 9;
     vector<vector<int>> plateau(size, vector<int>(size, 0));
@@ -27,9 +27,10 @@ int main()
             game.getMove(gameMove);
 
             std::cerr << "IA move " << gameMove.row << " " << gameMove.col << std::endl;
-            plateau.setCase(gameMove.row, gameMove.col, -1);
-            plateau.verifPlateau();
-
+            if (gameMove.row != -1) {
+                plateau.setCase(gameMove.row, gameMove.col, -1);
+                plateau.verifPlateau();
+            }
 
             plateau.prochainMove(myMove, gameMove);
 
