@@ -105,9 +105,10 @@ Campagnes lancees en mode `arena` via tache interactive, puis parsing des logs.
 | `MEDIUM_2` | base `ayoub` | 100 | 15 | 83 | 2 | 15.31% | KO |
 | `MEDIUM_2` | step1 `m2 step1 tactique simple` | 100 | 21 | 76 | 3 | 21.65% | KO |
 | `MEDIUM_2` | step2 `m2 step2 filtre tactique` | 100 | 17 | 81 | 1 | 17.35% | KO |
+| `MEDIUM_2` | step3 `m2 step3 eval anyboard centre coins` | 100 | 13 | 83 | 4 | 13.54% | KO |
 
 Note: dans les logs, les egalites apparaissent comme `IA AND PLAYER`.
-Conclusion provisoire: `step1` reste meilleur que `step2`.
+Conclusion provisoire: `step1` reste la meilleure variante testee a date (`21.65%`).
 
 ## Ce qui ne va pas encore
 
@@ -121,3 +122,58 @@ Conclusion provisoire: `step1` reste meilleur que `step2`.
 - verifier stabilite en mode `DEBUG` et `ARENA`
 - repartir de `step1` et tester un `step3` simple
 - ajouter un `.gitignore` pour `bin/`, `obj/`, executables et fichiers temporaires
+
+## Sources -> Partie du code utilisee
+
+Objectif de cette section: tracer precisement quelles sources ont influence quelles
+modifications, pour faciliter la soutenance et eviter les changements "boite noire".
+
+### Sources projet / protocole
+
+- Sujet officiel ESILV (`Projet IA Ultimate Tic Tac Toe.pdf`)
+  - utilise pour:
+    - regles de redirection vers la sous-grille suivante
+    - logique `ANY_BOARD` quand la sous-grille cible est terminee
+    - metrique de validation: 80% en mode Arena, egalites exclues
+- `HANDOFF-TICTACTOE.md` + `vm-notes-ayoub.md`
+  - utilise pour:
+    - protocole d'execution VM (tache interactive `schtasks /IT`)
+    - build MinGW avec `-fno-lto`
+    - methode de parsing des logs (`wins/losses/draws/starts`)
+
+### Sources algorithmiques (deepsearch)
+
+- `Optimisation Bot UTTT _ Feuille de Route.md`
+  - Palier 1 (evaluation): inspire la ponderation territoriale
+    centre > coins > bords sur la meta-grille/sous-grilles
+  - Palier 1 (mobilite): inspire le bonus/malus "coup libre" (`ANY_BOARD`)
+  - recommandation de methode:
+    - supprimer les biais de racine qui perturbent Minimax
+    - prioriser des ajustements d'evaluation avant d'ajouter de la complexite
+
+### Liens externes retenus (via deepsearch) et mapping code
+
+- AIMA - Adversarial Search:
+  [https://aima.cs.berkeley.edu/4th-ed/pdfs/newchap06.pdf](https://aima.cs.berkeley.edu/4th-ed/pdfs/newchap06.pdf)
+  - utilise comme base conceptuelle Minimax/Alpha-Beta
+- ChessProgramming - Move Ordering:
+  [https://www.chessprogramming.org/Move_Ordering](https://www.chessprogramming.org/Move_Ordering)
+  - utilise comme reference pour les futures evolutions (Killer Moves / History)
+- ChessProgramming - Killer Heuristic:
+  [https://www.chessprogramming.org/Killer_Heuristic](https://www.chessprogramming.org/Killer_Heuristic)
+  - candidate pour une prochaine iteration uniquement si gain net confirme
+- ChessProgramming - Zobrist Hashing:
+  [https://www.chessprogramming.org/Zobrist_Hashing](https://www.chessprogramming.org/Zobrist_Hashing)
+  - reference cible pour une future table de transposition (non integree ici)
+
+### Mapping concret sur cette branche
+
+- `m2 step1 tactique simple`:
+  - garde-fou tactique racine: victoire meta immediate + filtrage des reponses
+    adverses gagnantes immediates
+- `m2 step2 filtre tactique`:
+  - tri tactique racine additionnel (regression constatee)
+- `m2 step3 eval anyboard centre coins`:
+  - desactivation effective du tri racine `step2`
+  - ajout du bonus/malus de mobilite `ANY_BOARD` dans l'evaluation de feuille
+  - renforcement de la ponderation centre/coins dans l'evaluation statique
