@@ -144,63 +144,19 @@ bool Plateau::adversairePeutGagnerMetaAuProchainTour(const GameMove& myMove) {
     return danger;
 }
 
-bool Plateau::coupGagneSousPlateau(const GameMove& move, int joueur) {
-    int si = move.row / 3;
-    int sj = move.col / 3;
-    int anc = jouerCoup(move.row, move.col, joueur);
-    bool gagne = (m_e[si][sj] == joueur);
-    annulerCoup(move.row, move.col, anc);
-    return gagne;
-}
+int Plateau::bonusMobiliteAnyBoard(const GameMove& last, int joueurQuiJoue) {
+    bool lastValide = (last.row >= 0 && last.row < 9 && last.col >= 0 && last.col < 9);
+    if (!lastValide) return 0;
 
-bool Plateau::joueurPeutGagnerSousPlateauImmediat(int si, int sj, int joueur) {
-    if (m_e[si][sj] != 0 || estPlein(si, sj)) {
-        return false;
-    }
+    int cibleSi = last.row % 3;
+    int cibleSj = last.col % 3;
 
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            int r = si * 3 + i;
-            int c = sj * 3 + j;
-            if (m_g[r][c] != 0) continue;
+    // Si la sous-grille cible est terminee, le joueur courant a un coup libre (ANY_BOARD).
+    bool anyBoard = (m_e[cibleSi][cibleSj] != 0) || estPlein(cibleSi, cibleSj);
+    if (!anyBoard) return 0;
 
-            int anc = jouerCoup(r, c, joueur);
-            bool gagne = (m_e[si][sj] == joueur);
-            annulerCoup(r, c, anc);
-            if (gagne) return true;
-        }
-    }
-    return false;
-}
-
-bool Plateau::envoieAdversaireVersGainLocalImmediat(const GameMove& myMove) {
-    int cibleSi = myMove.row % 3;
-    int cibleSj = myMove.col % 3;
-    return joueurPeutGagnerSousPlateauImmediat(cibleSi, cibleSj, -1);
-}
-
-int Plateau::scoreTactiqueRacine(const GameMove& move) {
-    int score = 0;
-    int menacesAvant = urgenceMetaGrille(1);
-    bool gagneSousPlateau = false;
-
-    {
-        int anc = jouerCoup(move.row, move.col, 1);
-        int si = move.row / 3;
-        int sj = move.col / 3;
-        gagneSousPlateau = (m_e[si][sj] == 1);
-        int menacesApres = urgenceMetaGrille(1);
-        if (gagneSousPlateau && menacesApres > menacesAvant) {
-            score += 2500;
-        }
-        annulerCoup(move.row, move.col, anc);
-    }
-
-    if (envoieAdversaireVersGainLocalImmediat(move)) {
-        score -= 3000;
-    }
-
-    return score;
+    static const int BONUS_ANY_BOARD = 180;
+    return (joueurQuiJoue == 1) ? BONUS_ANY_BOARD : -BONUS_ANY_BOARD;
 }
 
 // ============================================================
@@ -374,7 +330,11 @@ static int poidsStrategique(int si, int sj,
     return poids;
 }
 
-static const int BONUS_POS[3][3] = {{3,2,3},{2,5,2},{3,2,3}};
+static const int META_CONTROL_SCORE[3][3] = {
+    {220, 140, 220},
+    {140, 320, 140},
+    {220, 140, 220}
+};
 
 int Plateau::evaluer() {
     int v = gagnantMetaGrille();
@@ -393,9 +353,13 @@ int Plateau::evaluer() {
             s += scoreLigne(e(i,0),e(i,1),e(i,2),p)*5;
             s += scoreLigne(e(0,i),e(1,i),e(2,i),p)*5;
         }
-        for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++)
-            if (m_e[i][j]==p) s += BONUS_POS[i][j];
         score += p * s * 200;
+    }
+
+    // 1.b Controle territorial des sous-plateaux (centre > coins > bords)
+    for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) {
+        if (m_e[i][j] == 1)  score += META_CONTROL_SCORE[i][j];
+        if (m_e[i][j] == -1) score -= META_CONTROL_SCORE[i][j];
     }
 
     // 2. Urgence : menaces a 2 sur la meta
@@ -406,6 +370,7 @@ int Plateau::evaluer() {
     for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) {
         if (m_e[i][j] != 0) continue;
         int dL=i*3, dC=j*3;
+        int poidsPosSousPlateau = (i==1 && j==1) ? 3 : ((i%2==0 && j%2==0) ? 2 : 1);
         for (int p : {1, -1}) {
             int poids = poidsStrategique(i, j, m_e, p);
             int s = 0;
@@ -415,7 +380,7 @@ int Plateau::evaluer() {
                 s += scoreLigne(m_g[dL+ii][dC],m_g[dL+ii][dC+1],m_g[dL+ii][dC+2],p);
                 s += scoreLigne(m_g[dL][dC+ii],m_g[dL+1][dC+ii],m_g[dL+2][dC+ii],p);
             }
-            score += p * s * poids;
+            score += p * s * poids * poidsPosSousPlateau;
         }
     }
 
@@ -427,16 +392,16 @@ int Plateau::evaluer() {
 //  Le tri dans minimax utilise un tableau local (tri par insertion)
 // ============================================================
 int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) {
-    if (tempsEcoule()) return evaluer();
+    if (tempsEcoule()) return evaluer() + bonusMobiliteAnyBoard(last, joueur);
 
     int v = gagnantMetaGrille();
     if (v ==  1) return SCORE_VICTOIRE + depth;
     if (v == -1) return SCORE_DEFAITE  - depth;
-    if (depth == 0) return evaluer();
+    if (depth == 0) return evaluer() + bonusMobiliteAnyBoard(last, joueur);
 
     GameMove buf[MAX_MOVES];
     int n = getCoupsLegauxFast(last, buf);
-    if (n == 0) return evaluer();
+    if (n == 0) return evaluer() + bonusMobiliteAnyBoard(last, joueur);
 
     // Tri par insertion (zero allocation, efficace pour n <= ~20 coups typiques)
     // On ne trie que si depth > 1 pour amortir le cout
@@ -508,13 +473,6 @@ void Plateau::prochainMove(GameMove& myMove, GameMove& lastMove) {
         coups.swap(coupsSurs);
         n = (int)coups.size();
     }
-
-    // Etape tactique 2:
-    // bonus si le coup gagne une sous-grille et cree une vraie menace meta,
-    // malus fort si on envoie l'adversaire dans une sous-grille gagnable en 1 coup.
-    stable_sort(coups.begin(), coups.end(), [&](const GameMove& a, const GameMove& b) {
-        return scoreTactiqueRacine(a) > scoreTactiqueRacine(b);
-    });
 
     g_debut  = steady_clock::now();
     myMove   = coups[0]; // meilleur par defaut (tri heuristique)

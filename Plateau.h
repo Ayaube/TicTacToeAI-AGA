@@ -40,10 +40,7 @@ private:
     int  etatSousPlateau(int si, int sj);
     bool coupDonneVictoireMeta(const GameMove& move, int joueur);
     bool adversairePeutGagnerMetaAuProchainTour(const GameMove& myMove);
-    bool coupGagneSousPlateau(const GameMove& move, int joueur);
-    bool joueurPeutGagnerSousPlateauImmediat(int si, int sj, int joueur);
-    bool envoieAdversaireVersGainLocalImmediat(const GameMove& myMove);
-    int  scoreTactiqueRacine(const GameMove& move);
+    int  bonusMobiliteAnyBoard(const GameMove& last, int joueurQuiJoue);
 
     // Version sans allocation : ecrit dans un buffer fourni
     int getCoupsLegauxFast(const GameMove& last, GameMove buf[MAX_MOVES]);
