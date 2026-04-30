@@ -144,6 +144,65 @@ bool Plateau::adversairePeutGagnerMetaAuProchainTour(const GameMove& myMove) {
     return danger;
 }
 
+bool Plateau::coupGagneSousPlateau(const GameMove& move, int joueur) {
+    int si = move.row / 3;
+    int sj = move.col / 3;
+    int anc = jouerCoup(move.row, move.col, joueur);
+    bool gagne = (m_e[si][sj] == joueur);
+    annulerCoup(move.row, move.col, anc);
+    return gagne;
+}
+
+bool Plateau::joueurPeutGagnerSousPlateauImmediat(int si, int sj, int joueur) {
+    if (m_e[si][sj] != 0 || estPlein(si, sj)) {
+        return false;
+    }
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            int r = si * 3 + i;
+            int c = sj * 3 + j;
+            if (m_g[r][c] != 0) continue;
+
+            int anc = jouerCoup(r, c, joueur);
+            bool gagne = (m_e[si][sj] == joueur);
+            annulerCoup(r, c, anc);
+            if (gagne) return true;
+        }
+    }
+    return false;
+}
+
+bool Plateau::envoieAdversaireVersGainLocalImmediat(const GameMove& myMove) {
+    int cibleSi = myMove.row % 3;
+    int cibleSj = myMove.col % 3;
+    return joueurPeutGagnerSousPlateauImmediat(cibleSi, cibleSj, -1);
+}
+
+int Plateau::scoreTactiqueRacine(const GameMove& move) {
+    int score = 0;
+    int menacesAvant = urgenceMetaGrille(1);
+    bool gagneSousPlateau = false;
+
+    {
+        int anc = jouerCoup(move.row, move.col, 1);
+        int si = move.row / 3;
+        int sj = move.col / 3;
+        gagneSousPlateau = (m_e[si][sj] == 1);
+        int menacesApres = urgenceMetaGrille(1);
+        if (gagneSousPlateau && menacesApres > menacesAvant) {
+            score += 2500;
+        }
+        annulerCoup(move.row, move.col, anc);
+    }
+
+    if (envoieAdversaireVersGainLocalImmediat(move)) {
+        score -= 3000;
+    }
+
+    return score;
+}
+
 // ============================================================
 //  Coups legaux : version FAST (buffer, zero malloc)
 // ============================================================
@@ -449,6 +508,13 @@ void Plateau::prochainMove(GameMove& myMove, GameMove& lastMove) {
         coups.swap(coupsSurs);
         n = (int)coups.size();
     }
+
+    // Etape tactique 2:
+    // bonus si le coup gagne une sous-grille et cree une vraie menace meta,
+    // malus fort si on envoie l'adversaire dans une sous-grille gagnable en 1 coup.
+    stable_sort(coups.begin(), coups.end(), [&](const GameMove& a, const GameMove& b) {
+        return scoreTactiqueRacine(a) > scoreTactiqueRacine(b);
+    });
 
     g_debut  = steady_clock::now();
     myMove   = coups[0]; // meilleur par defaut (tri heuristique)
