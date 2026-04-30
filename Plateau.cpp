@@ -116,6 +116,34 @@ int Plateau::etatSousPlateau(int si, int sj) {
     return 0;
 }
 
+bool Plateau::coupDonneVictoireMeta(const GameMove& move, int joueur) {
+    int anc = jouerCoup(move.row, move.col, joueur);
+    bool gagne = (gagnantMetaGrille() == joueur);
+    annulerCoup(move.row, move.col, anc);
+    return gagne;
+}
+
+bool Plateau::adversairePeutGagnerMetaAuProchainTour(const GameMove& myMove) {
+    int ancMy = jouerCoup(myMove.row, myMove.col, 1);
+
+    GameMove oppBuf[MAX_MOVES];
+    int oppN = getCoupsLegauxFast(myMove, oppBuf);
+    bool danger = false;
+
+    for (int i = 0; i < oppN; i++) {
+        int ancOpp = jouerCoup(oppBuf[i].row, oppBuf[i].col, -1);
+        if (gagnantMetaGrille() == -1) {
+            danger = true;
+            annulerCoup(oppBuf[i].row, oppBuf[i].col, ancOpp);
+            break;
+        }
+        annulerCoup(oppBuf[i].row, oppBuf[i].col, ancOpp);
+    }
+
+    annulerCoup(myMove.row, myMove.col, ancMy);
+    return danger;
+}
+
 // ============================================================
 //  Coups legaux : version FAST (buffer, zero malloc)
 // ============================================================
@@ -399,6 +427,28 @@ void Plateau::prochainMove(GameMove& myMove, GameMove& lastMove) {
     vector<GameMove> coups = getCoupsLegaux(lastMove); // tri initial
     int n = (int)coups.size();
     if (n == 0) return;
+
+    // Etape tactique 1:
+    // 1) jouer le gain meta immediat s'il existe
+    // 2) filtrer les coups qui donnent un gain meta immediat a l'adversaire
+    for (const GameMove& c : coups) {
+        if (coupDonneVictoireMeta(c, 1)) {
+            myMove = c;
+            return;
+        }
+    }
+
+    vector<GameMove> coupsSurs;
+    coupsSurs.reserve(coups.size());
+    for (const GameMove& c : coups) {
+        if (!adversairePeutGagnerMetaAuProchainTour(c)) {
+            coupsSurs.push_back(c);
+        }
+    }
+    if (!coupsSurs.empty()) {
+        coups.swap(coupsSurs);
+        n = (int)coups.size();
+    }
 
     g_debut  = steady_clock::now();
     myMove   = coups[0]; // meilleur par defaut (tri heuristique)
