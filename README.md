@@ -107,11 +107,13 @@ Campagnes lancees en mode `arena` via tache interactive, puis parsing des logs.
 | `MEDIUM_2` | step2 `m2 step2 filtre tactique` | 100 | 17 | 81 | 1 | 17.35% | KO |
 | `MEDIUM_2` | step3 `m2 step3 eval anyboard centre coins` | 100 | 13 | 83 | 4 | 13.54% | KO |
 | `MEDIUM_2` | step3b `m2 step3 anyboard only` | 100 | 15 | 81 | 3 | 15.62% | KO |
+| `MEDIUM_2` | step4 `m2 step4 eval continue meta anyboard` | 100 | 13 | 83 | 3 | 13.54% | KO |
 
 Note: dans les logs, les egalites apparaissent comme `IA AND PLAYER`.
 Conclusion provisoire: `step1` reste la meilleure variante testee a date (`21.65%`).
 Le `step3b` (ANY_BOARD seul) n'apporte pas de gain net par rapport a `step1`, donc
 pas d'integration de `Killer Moves` a ce stade.
+Le `step4` (Palier 1 sans filtres racine) est aussi en regression.
 
 ## Iteration en cours (Palier 1)
 
