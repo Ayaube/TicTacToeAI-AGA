@@ -315,7 +315,7 @@ static int poidsStrategique(int si, int sj,
     return poids;
 }
 
-static const int BONUS_POS[3][3] = {{3,2,3},{2,5,2},{3,2,3}};
+static const int BONUS_POS[3][3] = {{4,2,4},{2,7,2},{4,2,4}};
 
 int Plateau::evaluer() {
     int v = gagnantMetaGrille();
@@ -339,9 +339,9 @@ int Plateau::evaluer() {
         score += p * s * 200;
     }
 
-    // 2. Urgence : menaces a 2 sur la meta
-    score += urgenceMetaGrille( 1) * 600;
-    score -= urgenceMetaGrille(-1) * 600;
+    // 2. Urgence : menaces meta (defense un peu priorisee)
+    score += urgenceMetaGrille( 1) * 650;
+    score -= urgenceMetaGrille(-1) * 800;
 
     // 3. Score local de chaque sous-plateau non termine
     for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) {
