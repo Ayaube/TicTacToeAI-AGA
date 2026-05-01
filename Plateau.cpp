@@ -21,6 +21,7 @@ struct TTEntry {
     int depth = -1;
     int score = 0;
     TTFlag flag = TTFlag::VIDE;
+    GameMove bestMove{-1, -1};
     unsigned int generation = 0;
 };
 
@@ -426,7 +427,10 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
     int betaDepart = beta;
     uint64_t key = hashEtat(last, joueur);
     TTEntry& entry = g_transpositionTable[key & (TT_SIZE - 1)];
-    if (entry.generation == g_ttGeneration && entry.flag != TTFlag::VIDE && entry.key == key && entry.depth >= depth) {
+    bool entreeConnue = (entry.generation == g_ttGeneration && entry.flag != TTFlag::VIDE && entry.key == key);
+    GameMove coupTT{-1, -1};
+    if (entreeConnue) coupTT = entry.bestMove;
+    if (entreeConnue && entry.depth >= depth) {
         if (entry.flag == TTFlag::EXACT) return entry.score;
         if (entry.flag == TTFlag::BORNE_BASSE && entry.score >= beta) return entry.score;
         if (entry.flag == TTFlag::BORNE_HAUTE && entry.score <= alpha) return entry.score;
@@ -440,7 +444,11 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
     // On ne trie que si depth > 1 pour amortir le cout
     if (depth > 1) {
         int scores[MAX_MOVES];
-        for (int k = 0; k < n; k++) scores[k] = scorerCoupRapide(buf[k], m_g, m_e);
+        for (int k = 0; k < n; k++) {
+            int s = scorerCoupRapide(buf[k], m_g, m_e);
+            if (buf[k].row == coupTT.row && buf[k].col == coupTT.col) s += 100000;
+            scores[k] = s;
+        }
         for (int k = 1; k < n; k++) {
             GameMove cm = buf[k]; int cs = scores[k]; int kk = k-1;
             while (kk >= 0 && scores[kk] < cs) {
@@ -452,18 +460,20 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
 
     if (joueur == 1) {
         int best = numeric_limits<int>::min();
+        GameMove bestMove{-1, -1};
         for (int k = 0; k < n; k++) {
             if (tempsEcoule()) break;
             int anc = jouerCoup(buf[k].row, buf[k].col, 1);
             int s   = minimax(buf[k], depth-1, alpha, beta, -1);
             annulerCoup(buf[k].row, buf[k].col, anc);
-            if (s > best) best = s;
+            if (s > best) { best = s; bestMove = buf[k]; }
             if (best > alpha) alpha = best;
             if (beta <= alpha) break;
         }
         entry.key = key;
         entry.depth = depth;
         entry.score = best;
+        entry.bestMove = bestMove;
         entry.generation = g_ttGeneration;
         if (best <= alphaDepart) entry.flag = TTFlag::BORNE_HAUTE;
         else if (best >= betaDepart) entry.flag = TTFlag::BORNE_BASSE;
@@ -471,18 +481,20 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
         return best;
     } else {
         int best = numeric_limits<int>::max();
+        GameMove bestMove{-1, -1};
         for (int k = 0; k < n; k++) {
             if (tempsEcoule()) break;
             int anc = jouerCoup(buf[k].row, buf[k].col, -1);
             int s   = minimax(buf[k], depth-1, alpha, beta, 1);
             annulerCoup(buf[k].row, buf[k].col, anc);
-            if (s < best) best = s;
+            if (s < best) { best = s; bestMove = buf[k]; }
             if (best < beta) beta = best;
             if (beta <= alpha) break;
         }
         entry.key = key;
         entry.depth = depth;
         entry.score = best;
+        entry.bestMove = bestMove;
         entry.generation = g_ttGeneration;
         if (best <= alphaDepart) entry.flag = TTFlag::BORNE_HAUTE;
         else if (best >= betaDepart) entry.flag = TTFlag::BORNE_BASSE;
