@@ -144,19 +144,6 @@ bool Plateau::adversairePeutGagnerMetaAuProchainTour(const GameMove& myMove) {
     return danger;
 }
 
-int Plateau::bonusMobiliteAnyBoard(const GameMove& last, int joueurQuiJoue) {
-    bool lastValide = (last.row >= 0 && last.row < 9 && last.col >= 0 && last.col < 9);
-    if (!lastValide) return 0;
-
-    int cibleSi = last.row % 3;
-    int cibleSj = last.col % 3;
-    bool anyBoard = (m_e[cibleSi][cibleSj] != 0) || estPlein(cibleSi, cibleSj);
-    if (!anyBoard) return 0;
-
-    static const int BONUS_ANY_BOARD = 60;
-    return (joueurQuiJoue == 1) ? BONUS_ANY_BOARD : -BONUS_ANY_BOARD;
-}
-
 // ============================================================
 //  Coups legaux : version FAST (buffer, zero malloc)
 // ============================================================
@@ -328,17 +315,7 @@ static int poidsStrategique(int si, int sj,
     return poids;
 }
 
-static const int META_CONTROL_WEIGHT[3][3] = {
-    {5, 3, 5},
-    {3, 8, 3},
-    {5, 3, 5}
-};
-
-static const int LOCAL_GRID_WEIGHT[3][3] = {
-    {2, 1, 2},
-    {1, 3, 1},
-    {2, 1, 2}
-};
+static const int BONUS_POS[3][3] = {{3,2,3},{2,5,2},{3,2,3}};
 
 int Plateau::evaluer() {
     int v = gagnantMetaGrille();
@@ -347,30 +324,26 @@ int Plateau::evaluer() {
 
     int score = 0;
 
-    // 1. Alignements sur la meta-grille
+    // 1. Alignements sur la meta-grille (tres important)
     for (int p : {1, -1}) {
         int s = 0;
         auto e = [&](int i,int j){ return m_e[i][j]; };
-        s += scoreLigne(e(0,0),e(1,1),e(2,2),p) * 7;
-        s += scoreLigne(e(0,2),e(1,1),e(2,0),p) * 7;
+        s += scoreLigne(e(0,0),e(1,1),e(2,2),p)*5;
+        s += scoreLigne(e(0,2),e(1,1),e(2,0),p)*5;
         for (int i = 0; i < 3; i++) {
-            s += scoreLigne(e(i,0),e(i,1),e(i,2),p) * 6;
-            s += scoreLigne(e(0,i),e(1,i),e(2,i),p) * 6;
+            s += scoreLigne(e(i,0),e(i,1),e(i,2),p)*5;
+            s += scoreLigne(e(0,i),e(1,i),e(2,i),p)*5;
         }
-        score += p * s * 110;
+        for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++)
+            if (m_e[i][j]==p) s += BONUS_POS[i][j];
+        score += p * s * 200;
     }
 
-    // 2. Controle territorial meta (centre > coins > bords)
-    for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) {
-        if (m_e[i][j] == 1)  score += META_CONTROL_WEIGHT[i][j] * 90;
-        if (m_e[i][j] == -1) score -= META_CONTROL_WEIGHT[i][j] * 90;
-    }
+    // 2. Urgence : menaces a 2 sur la meta
+    score += urgenceMetaGrille( 1) * 600;
+    score -= urgenceMetaGrille(-1) * 600;
 
-    // 3. Menaces meta a 2-en-ligne
-    score += urgenceMetaGrille( 1) * 420;
-    score -= urgenceMetaGrille(-1) * 420;
-
-    // 4. Score local de chaque sous-plateau non termine
+    // 3. Score local de chaque sous-plateau non termine
     for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) {
         if (m_e[i][j] != 0) continue;
         int dL=i*3, dC=j*3;
@@ -383,7 +356,7 @@ int Plateau::evaluer() {
                 s += scoreLigne(m_g[dL+ii][dC],m_g[dL+ii][dC+1],m_g[dL+ii][dC+2],p);
                 s += scoreLigne(m_g[dL][dC+ii],m_g[dL+1][dC+ii],m_g[dL+2][dC+ii],p);
             }
-            score += p * s * poids * LOCAL_GRID_WEIGHT[i][j];
+            score += p * s * poids;
         }
     }
 
@@ -395,16 +368,16 @@ int Plateau::evaluer() {
 //  Le tri dans minimax utilise un tableau local (tri par insertion)
 // ============================================================
 int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) {
-    if (tempsEcoule()) return evaluer() + bonusMobiliteAnyBoard(last, joueur);
+    if (tempsEcoule()) return evaluer();
 
     int v = gagnantMetaGrille();
     if (v ==  1) return SCORE_VICTOIRE + depth;
     if (v == -1) return SCORE_DEFAITE  - depth;
-    if (depth == 0) return evaluer() + bonusMobiliteAnyBoard(last, joueur);
+    if (depth == 0) return evaluer();
 
     GameMove buf[MAX_MOVES];
     int n = getCoupsLegauxFast(last, buf);
-    if (n == 0) return evaluer() + bonusMobiliteAnyBoard(last, joueur);
+    if (n == 0) return evaluer();
 
     // Tri par insertion (zero allocation, efficace pour n <= ~20 coups typiques)
     // On ne trie que si depth > 1 pour amortir le cout
@@ -454,6 +427,28 @@ void Plateau::prochainMove(GameMove& myMove, GameMove& lastMove) {
     vector<GameMove> coups = getCoupsLegaux(lastMove); // tri initial
     int n = (int)coups.size();
     if (n == 0) return;
+
+    // Etape tactique 1:
+    // 1) jouer le gain meta immediat s'il existe
+    // 2) filtrer les coups qui donnent un gain meta immediat a l'adversaire
+    for (const GameMove& c : coups) {
+        if (coupDonneVictoireMeta(c, 1)) {
+            myMove = c;
+            return;
+        }
+    }
+
+    vector<GameMove> coupsSurs;
+    coupsSurs.reserve(coups.size());
+    for (const GameMove& c : coups) {
+        if (!adversairePeutGagnerMetaAuProchainTour(c)) {
+            coupsSurs.push_back(c);
+        }
+    }
+    if (!coupsSurs.empty()) {
+        coups.swap(coupsSurs);
+        n = (int)coups.size();
+    }
 
     g_debut  = steady_clock::now();
     myMove   = coups[0]; // meilleur par defaut (tri heuristique)
