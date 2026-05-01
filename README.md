@@ -108,12 +108,16 @@ Campagnes lancees en mode `arena` via tache interactive, puis parsing des logs.
 | `MEDIUM_2` | step3 `m2 step3 eval anyboard centre coins` | 100 | 13 | 83 | 4 | 13.54% | KO |
 | `MEDIUM_2` | step3b `m2 step3 anyboard only` | 100 | 15 | 81 | 3 | 15.62% | KO |
 | `MEDIUM_2` | step4 `m2 step4 eval continue meta anyboard` | 100 | 13 | 83 | 3 | 13.54% | KO |
+| `MEDIUM_2` | step4a `m2 palier1 variante a anyboard doux` | 100 | 14 | 81 | 5 | 14.74% | KO |
+| `MEDIUM_2` | step4b `m2 palier1 variante b defense meta` | 100 | 11 | 83 | 6 | 11.70% | KO |
+| `MEDIUM_2` | step5 `m2 palier2 killer moves simple` | 100 | 12 | 84 | 3 | 12.50% | KO |
 
 Note: dans les logs, les egalites apparaissent comme `IA AND PLAYER`.
 Conclusion provisoire: `step1` reste la meilleure variante testee a date (`21.65%`).
 Le `step3b` (ANY_BOARD seul) n'apporte pas de gain net par rapport a `step1`, donc
 pas d'integration de `Killer Moves` a ce stade.
 Le `step4` (Palier 1 sans filtres racine) est aussi en regression.
+Les variantes `step4a`, `step4b` et `step5` ont aussi regresse.
 
 ## Iteration en cours (Palier 1)
 
