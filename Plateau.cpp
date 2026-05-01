@@ -4,6 +4,7 @@
 #include <limits>
 #include <algorithm>
 #include <chrono>
+#include <cstdint>
 #include "Plateau.h"
 #include "main.h"
 
@@ -12,6 +13,25 @@ using namespace std::chrono;
 
 static const int TIMEOUT_MS = 350;
 static time_point<steady_clock> g_debut;
+
+enum class TTFlag : unsigned char { VIDE, EXACT, BORNE_BASSE, BORNE_HAUTE };
+
+struct TTEntry {
+    uint64_t key = 0;
+    int depth = -1;
+    int score = 0;
+    TTFlag flag = TTFlag::VIDE;
+};
+
+static const size_t TT_SIZE = 1 << 20;
+static vector<TTEntry> g_transpositionTable(TT_SIZE);
+
+static uint64_t melangeHash(uint64_t x) {
+    x += 0x9e3779b97f4a7c15ULL;
+    x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;
+    x = (x ^ (x >> 27)) * 0x94d049bb133111ebULL;
+    return x ^ (x >> 31);
+}
 
 static bool tempsEcoule() {
     return duration_cast<milliseconds>(steady_clock::now() - g_debut).count() >= TIMEOUT_MS;
@@ -142,6 +162,31 @@ bool Plateau::adversairePeutGagnerMetaAuProchainTour(const GameMove& myMove) {
 
     annulerCoup(myMove.row, myMove.col, ancMy);
     return danger;
+}
+
+unsigned long long Plateau::hashEtat(const GameMove& last, int joueur) const {
+    uint64_t h = 0x123456789abcdef0ULL;
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++) {
+            int v = m_g[i][j];
+            if (v != 0) {
+                uint64_t code = (uint64_t)(i * 9 + j + 1) * 3ULL + (v == 1 ? 1ULL : 2ULL);
+                h ^= melangeHash(code);
+            }
+        }
+    }
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            int v = m_e[i][j];
+            if (v != 0) {
+                uint64_t code = 300ULL + (uint64_t)(i * 3 + j + 1) * 5ULL + (uint64_t)(v + 2);
+                h ^= melangeHash(code);
+            }
+        }
+    }
+    h ^= melangeHash(500ULL + (uint64_t)((last.row + 1) * 16 + (last.col + 1)));
+    h ^= melangeHash(700ULL + (joueur == 1 ? 1ULL : 2ULL));
+    return h;
 }
 
 // ============================================================

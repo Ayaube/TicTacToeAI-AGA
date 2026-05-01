@@ -40,6 +40,7 @@ private:
     int  etatSousPlateau(int si, int sj);
     bool coupDonneVictoireMeta(const GameMove& move, int joueur);
     bool adversairePeutGagnerMetaAuProchainTour(const GameMove& myMove);
+    unsigned long long hashEtat(const GameMove& last, int joueur) const;
 
     // Version sans allocation : ecrit dans un buffer fourni
     int getCoupsLegauxFast(const GameMove& last, GameMove buf[MAX_MOVES]);
