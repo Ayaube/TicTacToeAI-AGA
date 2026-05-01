@@ -144,20 +144,6 @@ bool Plateau::adversairePeutGagnerMetaAuProchainTour(const GameMove& myMove) {
     return danger;
 }
 
-int Plateau::bonusMobiliteAnyBoard(const GameMove& last, int joueurQuiJoue) {
-    bool lastValide = (last.row >= 0 && last.row < 9 && last.col >= 0 && last.col < 9);
-    if (!lastValide) return 0;
-
-    int cibleSi = last.row % 3;
-    int cibleSj = last.col % 3;
-    bool anyBoard = (m_e[cibleSi][cibleSj] != 0) || estPlein(cibleSi, cibleSj);
-    if (!anyBoard) return 0;
-
-    // Bonus/malus volontairement doux pour ne pas ecraser le reste de l'evaluation.
-    static const int BONUS_ANY_BOARD = 40;
-    return (joueurQuiJoue == 1) ? BONUS_ANY_BOARD : -BONUS_ANY_BOARD;
-}
-
 // ============================================================
 //  Coups legaux : version FAST (buffer, zero malloc)
 // ============================================================
@@ -329,7 +315,7 @@ static int poidsStrategique(int si, int sj,
     return poids;
 }
 
-static const int BONUS_POS[3][3] = {{6,2,6},{2,10,2},{6,2,6}};
+static const int BONUS_POS[3][3] = {{3,2,3},{2,5,2},{3,2,3}};
 
 int Plateau::evaluer() {
     int v = gagnantMetaGrille();
@@ -382,16 +368,16 @@ int Plateau::evaluer() {
 //  Le tri dans minimax utilise un tableau local (tri par insertion)
 // ============================================================
 int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) {
-    if (tempsEcoule()) return evaluer() + bonusMobiliteAnyBoard(last, joueur);
+    if (tempsEcoule()) return evaluer();
 
     int v = gagnantMetaGrille();
     if (v ==  1) return SCORE_VICTOIRE + depth;
     if (v == -1) return SCORE_DEFAITE  - depth;
-    if (depth == 0) return evaluer() + bonusMobiliteAnyBoard(last, joueur);
+    if (depth == 0) return evaluer();
 
     GameMove buf[MAX_MOVES];
     int n = getCoupsLegauxFast(last, buf);
-    if (n == 0) return evaluer() + bonusMobiliteAnyBoard(last, joueur);
+    if (n == 0) return evaluer();
 
     // Tri par insertion (zero allocation, efficace pour n <= ~20 coups typiques)
     // On ne trie que si depth > 1 pour amortir le cout

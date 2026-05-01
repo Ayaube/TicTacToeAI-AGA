@@ -48,7 +48,6 @@ private:
 
     int evaluer();
     int urgenceMetaGrille(int joueur);
-    int bonusMobiliteAnyBoard(const GameMove& last, int joueurQuiJoue);
 };
 
 #endif // PLATEAU_H
