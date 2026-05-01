@@ -420,6 +420,16 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
     if (v == -1) return SCORE_DEFAITE  - depth;
     if (depth == 0) return evaluer();
 
+    int alphaDepart = alpha;
+    int betaDepart = beta;
+    uint64_t key = hashEtat(last, joueur);
+    TTEntry& entry = g_transpositionTable[key & (TT_SIZE - 1)];
+    if (entry.flag != TTFlag::VIDE && entry.key == key && entry.depth >= depth) {
+        if (entry.flag == TTFlag::EXACT) return entry.score;
+        if (entry.flag == TTFlag::BORNE_BASSE && entry.score >= beta) return entry.score;
+        if (entry.flag == TTFlag::BORNE_HAUTE && entry.score <= alpha) return entry.score;
+    }
+
     GameMove buf[MAX_MOVES];
     int n = getCoupsLegauxFast(last, buf);
     if (n == 0) return evaluer();
@@ -449,6 +459,12 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
             if (best > alpha) alpha = best;
             if (beta <= alpha) break;
         }
+        entry.key = key;
+        entry.depth = depth;
+        entry.score = best;
+        if (best <= alphaDepart) entry.flag = TTFlag::BORNE_HAUTE;
+        else if (best >= betaDepart) entry.flag = TTFlag::BORNE_BASSE;
+        else entry.flag = TTFlag::EXACT;
         return best;
     } else {
         int best = numeric_limits<int>::max();
@@ -461,6 +477,12 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
             if (best < beta) beta = best;
             if (beta <= alpha) break;
         }
+        entry.key = key;
+        entry.depth = depth;
+        entry.score = best;
+        if (best <= alphaDepart) entry.flag = TTFlag::BORNE_HAUTE;
+        else if (best >= betaDepart) entry.flag = TTFlag::BORNE_BASSE;
+        else entry.flag = TTFlag::EXACT;
         return best;
     }
 }
@@ -472,6 +494,7 @@ void Plateau::prochainMove(GameMove& myMove, GameMove& lastMove) {
     vector<GameMove> coups = getCoupsLegaux(lastMove); // tri initial
     int n = (int)coups.size();
     if (n == 0) return;
+    fill(g_transpositionTable.begin(), g_transpositionTable.end(), TTEntry{});
 
     // Etape tactique 1:
     // 1) jouer le gain meta immediat s'il existe
