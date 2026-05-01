@@ -7,7 +7,7 @@
 
 static const int SCORE_VICTOIRE =  1000000;
 static const int SCORE_DEFAITE  = -1000000;
-static const int PROFONDEUR_MAX = 11;
+static const int PROFONDEUR_MAX = 9;
 static const int MAX_MOVES      = 81; // au maximum 81 coups possibles
 
 class Plateau {

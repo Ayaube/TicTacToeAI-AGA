@@ -113,6 +113,7 @@ Campagnes lancees en mode `arena` via tache interactive, puis parsing des logs.
 | `MEDIUM_2` | step5 `m2 palier2 killer moves simple` | 100 | 12 | 84 | 3 | 12.50% | KO |
 | `MEDIUM_2` | step6 `m2 palier3 table transposition simple` | 100 | 21 | 75 | 3 | 21.88% | KO |
 | `MEDIUM_2` | step6b `m2 palier3 priorise meilleur coup table` | 100 | 22 | 73 | 5 | 23.16% | KO |
+| `MEDIUM_2` | step6c `m2 palier3 augmente profondeur max` | 100 | 21 | 74 | 5 | 22.11% | KO |
 
 Note: dans les logs, les egalites apparaissent comme `IA AND PLAYER`.
 Conclusion provisoire: `step1` reste la meilleure variante testee a date (`21.65%`).
@@ -122,6 +123,7 @@ Le `step4` (Palier 1 sans filtres racine) est aussi en regression.
 Les variantes `step4a`, `step4b` et `step5` ont aussi regresse.
 Le `step6` (table de transposition simple) apporte un petit gain net vs `step1`.
 Le `step6b` confirme le Palier 3 avec le meilleur score actuel (`23.16%`).
+Le `step6c` (profondeur 11) regresse vs `step6b`, donc retour a profondeur 9.
 
 ## Iteration en cours (Palier 1)
 
