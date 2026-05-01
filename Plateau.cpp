@@ -12,9 +12,14 @@ using namespace std::chrono;
 
 static const int TIMEOUT_MS = 350;
 static time_point<steady_clock> g_debut;
+static GameMove g_killerMoves[PROFONDEUR_MAX + 1][2];
 
 static bool tempsEcoule() {
     return duration_cast<milliseconds>(steady_clock::now() - g_debut).count() >= TIMEOUT_MS;
+}
+
+static bool memeCoup(const GameMove& a, const GameMove& b) {
+    return a.row == b.row && a.col == b.col;
 }
 
 // ============================================================
@@ -383,7 +388,12 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
     // On ne trie que si depth > 1 pour amortir le cout
     if (depth > 1) {
         int scores[MAX_MOVES];
-        for (int k = 0; k < n; k++) scores[k] = scorerCoupRapide(buf[k], m_g, m_e);
+        for (int k = 0; k < n; k++) {
+            int s = scorerCoupRapide(buf[k], m_g, m_e);
+            if (memeCoup(buf[k], g_killerMoves[depth][0])) s += 50000;
+            else if (memeCoup(buf[k], g_killerMoves[depth][1])) s += 25000;
+            scores[k] = s;
+        }
         for (int k = 1; k < n; k++) {
             GameMove cm = buf[k]; int cs = scores[k]; int kk = k-1;
             while (kk >= 0 && scores[kk] < cs) {
@@ -402,7 +412,13 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
             annulerCoup(buf[k].row, buf[k].col, anc);
             if (s > best) best = s;
             if (best > alpha) alpha = best;
-            if (beta <= alpha) break;
+            if (beta <= alpha) {
+                if (!memeCoup(buf[k], g_killerMoves[depth][0])) {
+                    g_killerMoves[depth][1] = g_killerMoves[depth][0];
+                    g_killerMoves[depth][0] = buf[k];
+                }
+                break;
+            }
         }
         return best;
     } else {
@@ -414,7 +430,13 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
             annulerCoup(buf[k].row, buf[k].col, anc);
             if (s < best) best = s;
             if (best < beta) beta = best;
-            if (beta <= alpha) break;
+            if (beta <= alpha) {
+                if (!memeCoup(buf[k], g_killerMoves[depth][0])) {
+                    g_killerMoves[depth][1] = g_killerMoves[depth][0];
+                    g_killerMoves[depth][0] = buf[k];
+                }
+                break;
+            }
         }
         return best;
     }
@@ -427,6 +449,11 @@ void Plateau::prochainMove(GameMove& myMove, GameMove& lastMove) {
     vector<GameMove> coups = getCoupsLegaux(lastMove); // tri initial
     int n = (int)coups.size();
     if (n == 0) return;
+
+    for (int d = 0; d <= PROFONDEUR_MAX; d++) {
+        g_killerMoves[d][0] = {-1, -1};
+        g_killerMoves[d][1] = {-1, -1};
+    }
 
     // Etape tactique 1:
     // 1) jouer le gain meta immediat s'il existe
