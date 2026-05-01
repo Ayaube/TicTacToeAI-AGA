@@ -112,6 +112,7 @@ Campagnes lancees en mode `arena` via tache interactive, puis parsing des logs.
 | `MEDIUM_2` | step4b `m2 palier1 variante b defense meta` | 100 | 11 | 83 | 6 | 11.70% | KO |
 | `MEDIUM_2` | step5 `m2 palier2 killer moves simple` | 100 | 12 | 84 | 3 | 12.50% | KO |
 | `MEDIUM_2` | step6 `m2 palier3 table transposition simple` | 100 | 21 | 75 | 3 | 21.88% | KO |
+| `MEDIUM_2` | step6b `m2 palier3 priorise meilleur coup table` | 100 | 22 | 73 | 5 | 23.16% | KO |
 
 Note: dans les logs, les egalites apparaissent comme `IA AND PLAYER`.
 Conclusion provisoire: `step1` reste la meilleure variante testee a date (`21.65%`).
@@ -120,6 +121,7 @@ pas d'integration de `Killer Moves` a ce stade.
 Le `step4` (Palier 1 sans filtres racine) est aussi en regression.
 Les variantes `step4a`, `step4b` et `step5` ont aussi regresse.
 Le `step6` (table de transposition simple) apporte un petit gain net vs `step1`.
+Le `step6b` confirme le Palier 3 avec le meilleur score actuel (`23.16%`).
 
 ## Iteration en cours (Palier 1)
 
