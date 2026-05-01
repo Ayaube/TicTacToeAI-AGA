@@ -21,10 +21,12 @@ struct TTEntry {
     int depth = -1;
     int score = 0;
     TTFlag flag = TTFlag::VIDE;
+    unsigned int generation = 0;
 };
 
 static const size_t TT_SIZE = 1 << 20;
 static vector<TTEntry> g_transpositionTable(TT_SIZE);
+static unsigned int g_ttGeneration = 1;
 
 static uint64_t melangeHash(uint64_t x) {
     x += 0x9e3779b97f4a7c15ULL;
@@ -424,7 +426,7 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
     int betaDepart = beta;
     uint64_t key = hashEtat(last, joueur);
     TTEntry& entry = g_transpositionTable[key & (TT_SIZE - 1)];
-    if (entry.flag != TTFlag::VIDE && entry.key == key && entry.depth >= depth) {
+    if (entry.generation == g_ttGeneration && entry.flag != TTFlag::VIDE && entry.key == key && entry.depth >= depth) {
         if (entry.flag == TTFlag::EXACT) return entry.score;
         if (entry.flag == TTFlag::BORNE_BASSE && entry.score >= beta) return entry.score;
         if (entry.flag == TTFlag::BORNE_HAUTE && entry.score <= alpha) return entry.score;
@@ -462,6 +464,7 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
         entry.key = key;
         entry.depth = depth;
         entry.score = best;
+        entry.generation = g_ttGeneration;
         if (best <= alphaDepart) entry.flag = TTFlag::BORNE_HAUTE;
         else if (best >= betaDepart) entry.flag = TTFlag::BORNE_BASSE;
         else entry.flag = TTFlag::EXACT;
@@ -480,6 +483,7 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
         entry.key = key;
         entry.depth = depth;
         entry.score = best;
+        entry.generation = g_ttGeneration;
         if (best <= alphaDepart) entry.flag = TTFlag::BORNE_HAUTE;
         else if (best >= betaDepart) entry.flag = TTFlag::BORNE_BASSE;
         else entry.flag = TTFlag::EXACT;
@@ -494,7 +498,8 @@ void Plateau::prochainMove(GameMove& myMove, GameMove& lastMove) {
     vector<GameMove> coups = getCoupsLegaux(lastMove); // tri initial
     int n = (int)coups.size();
     if (n == 0) return;
-    fill(g_transpositionTable.begin(), g_transpositionTable.end(), TTEntry{});
+    g_ttGeneration++;
+    if (g_ttGeneration == 0) g_ttGeneration = 1;
 
     // Etape tactique 1:
     // 1) jouer le gain meta immediat s'il existe
