@@ -125,15 +125,13 @@ Le `step6` (table de transposition simple) apporte un petit gain net vs `step1`.
 Le `step6b` confirme le Palier 3 avec le meilleur score actuel (`23.16%`).
 Le `step6c` (profondeur 11) regresse vs `step6b`, donc retour a profondeur 9.
 
-## Iteration en cours (Palier 1)
+## Iteration en cours (Palier 3)
 
-- `m2 step4 retire filtres racine`:
-  - suppression des regles binaires a la racine dans `prochainMove`
-  - objectif: decision pilotee par l'evaluation continue
-- `m2 step4 eval continue meta anyboard` (a benchmarker):
-  - poids explicites centre > coins > bords sur la meta-grille
-  - renforcement des menaces meta a 2-en-ligne
-  - bonus/malus `ANY_BOARD` adouci
+- Branche dediee: `ayoub_medium2_tt`
+- Meilleur commit actuel: `b955909`
+- Meilleure variante: `step6b` (table de transposition + meilleur coup priorise)
+- Score actuel a battre: `23.16%` contre `MEDIUM_2`
+- Handoff detaille: `HANDOFF-TT.md`
 
 ## Ce qui ne va pas encore
 
@@ -144,8 +142,9 @@ Le `step6c` (profondeur 11) regresse vs `step6b`, donc retour a profondeur 9.
 
 ## Reste a faire
 
-- verifier stabilite en mode `DEBUG` et `ARENA`
-- repartir de `step1` et tester un `step3` simple
+- continuer sur `ayoub_medium2_tt`
+- tester la conservation de la table de transposition entre coups
+- envisager un Zobrist incremental si la TT reste prometteuse
 - ajouter un `.gitignore` pour `bin/`, `obj/`, executables et fichiers temporaires
 
 ## Sources -> Partie du code utilisee
