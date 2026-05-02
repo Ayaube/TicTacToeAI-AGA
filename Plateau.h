@@ -45,7 +45,6 @@ private:
     // Version sans allocation : ecrit dans un buffer fourni
     int getCoupsLegauxFast(const GameMove& last, GameMove buf[MAX_MOVES]);
 
-    void ordonnerCoupsRacineAvecTT(std::vector<GameMove>& coups, int profondeurMinTT);
     int minimax(GameMove last, int depth, int alpha, int beta, int joueur);
 
     int evaluer();
