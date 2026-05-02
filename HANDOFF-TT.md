@@ -11,6 +11,7 @@ Date: 2026-05-02
 - Meilleure version actuelle: `step6b`, table de transposition + meilleur coup priorise, `23.16%`
 - Derniere piste testee: `step7` TT persistante entre coups, regression a `20.21%`, rollback applique
 - Autre piste testee: `step8` hash incremental, regression a `22.22%`, rollback applique
+- Autre piste testee: `step9` remplacement TT profondeur d'abord, regression a `15.22%`, rollback applique
 - Objectif final: valider `MEDIUM_2` a 80% en mode Arena (egalites exclues)
 
 ## Resultats importants
@@ -31,8 +32,9 @@ Date: 2026-05-02
 | `step6c` | TT + profondeur 11 | 22.11% |
 | `step7` | TT conservee entre coups | 20.21% |
 | `step8` | hash incremental | 22.22% |
+| `step9` | remplacement TT profondeur d'abord | 15.22% |
 
-Conclusion: les reglages d'evaluation et les heuristiques racine ont souvent degrade. Le seul axe qui a donne un gain net est la table de transposition, mais la conservation simple entre coups et le hash incremental simple ont regresse.
+Conclusion: les reglages d'evaluation et les heuristiques racine ont souvent degrade. Le seul axe qui a donne un gain net est la table de transposition, mais la conservation simple entre coups, le hash incremental simple et le remplacement profondeur d'abord ont regresse.
 
 ## Ce qui est implemente dans `step6b`
 
@@ -68,6 +70,7 @@ Conclusion: les reglages d'evaluation et les heuristiques racine ont souvent deg
 - La generation TT est incrementee a chaque coup joueur (`prochainMove`), donc la table est surtout utile pendant l'approfondissement iteratif d'un coup donne.
 - Cette invalidation par coup doit rester en place pour l'instant: le test `step7` qui gardait la TT pendant toute la partie a fait `19/75/6`, soit `20.21%`.
 - Le hash incremental simple (`step8`) gardait la meme formule de cle mais maintenait grille/meta en O(1); il a fait `20/70/10`, soit `22.22%`, donc il a aussi ete revert.
+- Le remplacement TT profondeur d'abord (`step9`) a fait `14/78/8`, soit `15.22%`, donc garder les entrees profondes au lieu de remplacer simplement n'aide pas ici.
 
 ## Pistes serieuses pour la suite
 
@@ -103,16 +106,29 @@ Interpretation possible:
 - le changement de cout/timing peut modifier les profondeurs atteintes et la distribution des decisions
 - le gain brut de CPU ne suffit pas a battre `step6b` dans ce protocole.
 
-### 3. Politique TT plus robuste
+### 3. Remplacement TT profondeur d'abord teste puis revert
 
-Idee: garder la TT par coup, mais ameliorer la qualite de remplacement/lecture plutot que la duree de vie ou le cout du hash.
+Idee testee le 2026-05-02: garder la TT par coup, mais ne remplacer une entree existante de la generation courante que si la nouvelle recherche est au moins aussi profonde.
 
-Pistes prudentes:
-- ne remplacer une entree existante que si la nouvelle profondeur est superieure ou si l'ancienne generation est obsolete
-- conserver le meilleur coup TT meme quand l'entree n'est pas assez profonde pour retourner le score
-- tester un bonus TT plus modere au tri si le meilleur coup TT biaise trop fortement l'ordre.
+Resultat:
+- commit teste: `665f856` (`m2 remplace tt par profondeur`)
+- benchmark: `run_med2_step9_ttdepth.log`
+- stats: 100 starts, 14 wins, 78 losses, 8 draws
+- score hors egalites: `15.22%`
+- decision: rollback, conserver le remplacement simple de `step6b`.
 
-### 4. Best move TT a la racine
+Interpretation possible:
+- dans cette table directe de taille fixe, refuser des remplacements peut garder des entrees profondes mais moins pertinentes pour les branches courantes
+- le remplacement simple semble mieux s'accorder avec l'approfondissement iteratif actuel.
+
+### 4. Pistes TT restantes prudentes
+
+Pistes possibles, a tester une par une:
+- appliquer le meilleur coup TT au tri racine dans `prochainMove`
+- tester un bonus TT interne plus modere que `100000`
+- instrumenter quelques compteurs TT (hits, exact, bornes, remplacements) sur une partie debug avant de retoucher la politique.
+
+### 5. Best move TT a la racine
 
 Idee: appliquer explicitement le meilleur coup TT au tri des coups dans `prochainMove`, pas seulement dans les noeuds internes de `minimax`.
 
@@ -123,7 +139,7 @@ Pourquoi c'est raisonnable:
 Risque:
 - gain probablement faible
 
-### 5. Historique de coups tres leger
+### 6. Historique de coups tres leger
 
 Idee: remplacer le `Killer Moves` qui a regresse par une history heuristic simple indexee par case globale `row * 9 + col`.
 
