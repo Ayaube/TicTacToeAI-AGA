@@ -10,6 +10,7 @@ Date: 2026-05-02
 - Base stable avant TT: `step1` (`95b018b`) avec `21.65%` contre `MEDIUM_2`
 - Meilleure version actuelle: `step6b`, table de transposition + meilleur coup priorise, `23.16%`
 - Derniere piste testee: `step7` TT persistante entre coups, regression a `20.21%`, rollback applique
+- Autre piste testee: `step8` hash incremental, regression a `22.22%`, rollback applique
 - Objectif final: valider `MEDIUM_2` a 80% en mode Arena (egalites exclues)
 
 ## Resultats importants
@@ -29,8 +30,9 @@ Date: 2026-05-02
 | `step6b` | TT + meilleur coup priorise | 23.16% |
 | `step6c` | TT + profondeur 11 | 22.11% |
 | `step7` | TT conservee entre coups | 20.21% |
+| `step8` | hash incremental | 22.22% |
 
-Conclusion: les reglages d'evaluation et les heuristiques racine ont souvent degrade. Le seul axe qui a donne un gain net est la table de transposition, mais la conservation simple entre coups a regresse.
+Conclusion: les reglages d'evaluation et les heuristiques racine ont souvent degrade. Le seul axe qui a donne un gain net est la table de transposition, mais la conservation simple entre coups et le hash incremental simple ont regresse.
 
 ## Ce qui est implemente dans `step6b`
 
@@ -65,6 +67,7 @@ Conclusion: les reglages d'evaluation et les heuristiques racine ont souvent deg
 - La TT actuelle est volontairement simple. Elle n'est pas un Zobrist incremental.
 - La generation TT est incrementee a chaque coup joueur (`prochainMove`), donc la table est surtout utile pendant l'approfondissement iteratif d'un coup donne.
 - Cette invalidation par coup doit rester en place pour l'instant: le test `step7` qui gardait la TT pendant toute la partie a fait `19/75/6`, soit `20.21%`.
+- Le hash incremental simple (`step8`) gardait la meme formule de cle mais maintenait grille/meta en O(1); il a fait `20/70/10`, soit `22.22%`, donc il a aussi ete revert.
 
 ## Pistes serieuses pour la suite
 
@@ -84,24 +87,32 @@ Resultat:
 - score hors egalites: `20.21%`
 - decision: rollback, ne pas reprendre cette variante simple sans changer la politique de remplacement/hash.
 
-### 2. Ajouter un vrai Zobrist incremental
+### 2. Hash incremental simple teste puis revert
 
-Idee: remplacer le hash recalcule en O(81) par un hash incrementable dans `jouerCoup` / `annulerCoup`.
+Idee testee le 2026-05-02: remplacer le hash recalcule en O(81) par un hash maintenu dans `setCase`, `verifPlateau`, `jouerCoup` et `annulerCoup`, sans changer la formule de cle.
 
-Pourquoi c'est prometteur:
-- la TT gagne si le hash est tres bon marche
-- actuellement chaque noeud paie un scan complet du plateau
+Resultat:
+- commit teste: `29a617e` (`m2 ajoute hash incremental`)
+- benchmark: `run_med2_step8_hashinc.log`
+- stats: 100 starts, 20 wins, 70 losses, 10 draws
+- score hors egalites: `22.22%`
+- decision: rollback, ne pas reprendre ce hash incremental simple sans autre changement.
 
-Risque:
-- plus de surface de bug: `annulerCoup` doit restaurer exactement le hash
-- il faut inclure meta-grille et contrainte `lastMove`
+Interpretation possible:
+- le hash etait valide localement contre une recomputation complete
+- le changement de cout/timing peut modifier les profondeurs atteintes et la distribution des decisions
+- le gain brut de CPU ne suffit pas a battre `step6b` dans ce protocole.
 
-Approche prudente:
-- garder le hash actuel comme reference debug temporaire
-- ajouter un `m_hashPieces` ou recalculer seulement pieces/meta avec Zobrist
-- tester quelques positions avec comparaison hash incremental vs recalcul complet
+### 3. Politique TT plus robuste
 
-### 3. Best move TT a la racine
+Idee: garder la TT par coup, mais ameliorer la qualite de remplacement/lecture plutot que la duree de vie ou le cout du hash.
+
+Pistes prudentes:
+- ne remplacer une entree existante que si la nouvelle profondeur est superieure ou si l'ancienne generation est obsolete
+- conserver le meilleur coup TT meme quand l'entree n'est pas assez profonde pour retourner le score
+- tester un bonus TT plus modere au tri si le meilleur coup TT biaise trop fortement l'ordre.
+
+### 4. Best move TT a la racine
 
 Idee: appliquer explicitement le meilleur coup TT au tri des coups dans `prochainMove`, pas seulement dans les noeuds internes de `minimax`.
 
@@ -112,7 +123,7 @@ Pourquoi c'est raisonnable:
 Risque:
 - gain probablement faible
 
-### 4. Historique de coups tres leger
+### 5. Historique de coups tres leger
 
 Idee: remplacer le `Killer Moves` qui a regresse par une history heuristic simple indexee par case globale `row * 9 + col`.
 

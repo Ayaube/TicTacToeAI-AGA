@@ -115,6 +115,7 @@ Campagnes lancees en mode `arena` via tache interactive, puis parsing des logs.
 | `MEDIUM_2` | step6b `m2 palier3 priorise meilleur coup table` | 100 | 22 | 73 | 5 | 23.16% | KO |
 | `MEDIUM_2` | step6c `m2 palier3 augmente profondeur max` | 100 | 21 | 74 | 5 | 22.11% | KO |
 | `MEDIUM_2` | step7 `m2 garde la table entre coups` | 100 | 19 | 75 | 6 | 20.21% | KO |
+| `MEDIUM_2` | step8 `m2 ajoute hash incremental` | 100 | 20 | 70 | 10 | 22.22% | KO |
 
 Note: dans les logs, les egalites apparaissent comme `IA AND PLAYER`.
 Conclusion provisoire: `step6b` reste la meilleure variante testee a date (`23.16%`).
@@ -127,6 +128,8 @@ Le `step6b` confirme le Palier 3 avec le meilleur score actuel (`23.16%`).
 Le `step6c` (profondeur 11) regresse vs `step6b`, donc retour a profondeur 9.
 Le `step7` (conservation de la TT entre coups d'une partie) regresse aussi, donc
 rollback vers la generation incrementee a chaque `prochainMove`.
+Le `step8` (hash incremental sans changer la formule de cle) regresse legerement
+vs `step6b`, donc rollback egalement.
 
 ## Iteration en cours (Palier 3)
 
@@ -147,7 +150,8 @@ rollback vers la generation incrementee a chaque `prochainMove`.
 
 - continuer sur `ayoub_medium2_tt`
 - ne pas conserver la table de transposition entre coups dans l'etat actuel (`step7` a regresse)
-- envisager un Zobrist incremental si la TT reste prometteuse
+- ne pas reprendre le hash incremental simple sans autre changement (`step8` a regresse)
+- envisager plutot une politique de remplacement TT plus robuste ou une meilleure exploitation du meilleur coup TT
 - ajouter un `.gitignore` pour `bin/`, `obj/`, executables et fichiers temporaires
 
 ## Sources -> Partie du code utilisee
