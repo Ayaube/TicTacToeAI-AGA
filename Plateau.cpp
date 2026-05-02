@@ -503,6 +503,38 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
     }
 }
 
+void Plateau::ordonnerCoupsRacineAvecTT(vector<GameMove>& coups, int profondeurMinTT) {
+    int n = (int)coups.size();
+    if (n <= 1 || profondeurMinTT <= 0) return;
+
+    int scores[MAX_MOVES];
+    for (int k = 0; k < n; k++) {
+        int s = scorerCoupRapide(coups[k], m_g, m_e);
+        int anc = jouerCoup(coups[k].row, coups[k].col, 1);
+        uint64_t key = hashEtat(coups[k], -1);
+        TTEntry& entry = g_transpositionTable[key & (TT_SIZE - 1)];
+        if (entry.generation == g_ttGeneration && entry.flag != TTFlag::VIDE &&
+            entry.key == key && entry.depth >= profondeurMinTT) {
+            s += entry.score;
+        }
+        annulerCoup(coups[k].row, coups[k].col, anc);
+        scores[k] = s;
+    }
+
+    for (int k = 1; k < n; k++) {
+        GameMove cm = coups[k];
+        int cs = scores[k];
+        int kk = k - 1;
+        while (kk >= 0 && scores[kk] < cs) {
+            coups[kk + 1] = coups[kk];
+            scores[kk + 1] = scores[kk];
+            kk--;
+        }
+        coups[kk + 1] = cm;
+        scores[kk + 1] = cs;
+    }
+}
+
 // ============================================================
 //  Point d'entree : approfondissement iteratif
 // ============================================================
@@ -540,6 +572,7 @@ void Plateau::prochainMove(GameMove& myMove, GameMove& lastMove) {
 
     for (int prof = 1; prof <= PROFONDEUR_MAX; prof++) {
         if (tempsEcoule()) break;
+        if (prof > 2) ordonnerCoupsRacineAvecTT(coups, prof - 2);
 
         int bestScore = numeric_limits<int>::min();
         int bestIdx   = 0;
