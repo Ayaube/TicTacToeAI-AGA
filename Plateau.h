@@ -2,6 +2,7 @@
 #define PLATEAU_H
 
 #include <array>
+#include <cstdint>
 #include <vector>
 #include "main.h"
 
@@ -34,9 +35,11 @@ private:
     // Donnees : tableaux plats, pas de vector -> zero allocation dans minimax
     std::array<std::array<int,9>,9> m_g; // grille 9x9
     std::array<std::array<int,3>,3> m_e; // etat meta 3x3
+    std::uint64_t m_hashBase; // hash incremental de m_g + m_e
 
     int  jouerCoup(int row, int col, int joueur);
     void annulerCoup(int row, int col, int ancienEtat);
+    void setEtatMeta(int si, int sj, int val);
     int  etatSousPlateau(int si, int sj);
     bool coupDonneVictoireMeta(const GameMove& move, int joueur);
     bool adversairePeutGagnerMetaAuProchainTour(const GameMove& myMove);

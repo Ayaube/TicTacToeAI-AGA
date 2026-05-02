@@ -36,6 +36,16 @@ static uint64_t melangeHash(uint64_t x) {
     return x ^ (x >> 31);
 }
 
+static uint64_t hashPiece(int row, int col, int joueur) {
+    uint64_t code = (uint64_t)(row * 9 + col + 1) * 3ULL + (joueur == 1 ? 1ULL : 2ULL);
+    return melangeHash(code);
+}
+
+static uint64_t hashMeta(int si, int sj, int val) {
+    uint64_t code = 300ULL + (uint64_t)(si * 3 + sj + 1) * 5ULL + (uint64_t)(val + 2);
+    return melangeHash(code);
+}
+
 static bool tempsEcoule() {
     return duration_cast<milliseconds>(steady_clock::now() - g_debut).count() >= TIMEOUT_MS;
 }
@@ -43,14 +53,19 @@ static bool tempsEcoule() {
 // ============================================================
 //  Constructeur
 // ============================================================
-Plateau::Plateau() {
+Plateau::Plateau() : m_hashBase(0) {
     for (auto& r : m_g) r.fill(0);
     for (auto& r : m_e) r.fill(0);
 }
 Plateau::~Plateau() {}
 
 int  Plateau::getCase(int r, int c)          { return m_g[r][c]; }
-void Plateau::setCase(int r, int c, int val) { m_g[r][c] = val; }
+void Plateau::setCase(int r, int c, int val) {
+    int ancien = m_g[r][c];
+    if (ancien != 0) m_hashBase ^= hashPiece(r, c, ancien);
+    m_g[r][c] = val;
+    if (val != 0) m_hashBase ^= hashPiece(r, c, val);
+}
 
 void Plateau::affiche_plateau() {
     for (auto& row : m_g) {
@@ -80,12 +95,12 @@ void Plateau::verifPlateau() {
         if (m_e[i][j] != 0) continue;
         int r = gagnant(i*3, j*3);
         if (r) {
-            m_e[i][j] = r;
+            setEtatMeta(i, j, r);
             cout << (r==1 ? "Joueur" : "IA")
                  << " gagne sous-plateau (" << i << "," << j << ")\n";
         } else if (estPlein(i, j)) {
             // 2 = sous-plateau termine sur un nul
-            m_e[i][j] = 2;
+            setEtatMeta(i, j, 2);
         }
     }
 }
@@ -119,17 +134,24 @@ int Plateau::gagnantMetaGrille() {
 //  Simulation
 // ============================================================
 int Plateau::jouerCoup(int row, int col, int joueur) {
-    m_g[row][col] = joueur;
+    setCase(row, col, joueur);
     int si = row/3, sj = col/3;
     int ancien = m_e[si][sj];
     if (ancien == 0) {
-        m_e[si][sj] = etatSousPlateau(si, sj);
+        setEtatMeta(si, sj, etatSousPlateau(si, sj));
     }
     return ancien;
 }
 void Plateau::annulerCoup(int row, int col, int ancienEtat) {
-    m_g[row][col] = 0;
-    m_e[row/3][col/3] = ancienEtat;
+    setCase(row, col, 0);
+    setEtatMeta(row/3, col/3, ancienEtat);
+}
+
+void Plateau::setEtatMeta(int si, int sj, int val) {
+    int ancien = m_e[si][sj];
+    if (ancien != 0) m_hashBase ^= hashMeta(si, sj, ancien);
+    m_e[si][sj] = val;
+    if (val != 0) m_hashBase ^= hashMeta(si, sj, val);
 }
 
 int Plateau::etatSousPlateau(int si, int sj) {
@@ -168,25 +190,7 @@ bool Plateau::adversairePeutGagnerMetaAuProchainTour(const GameMove& myMove) {
 }
 
 unsigned long long Plateau::hashEtat(const GameMove& last, int joueur) const {
-    uint64_t h = 0x123456789abcdef0ULL;
-    for (int i = 0; i < 9; i++) {
-        for (int j = 0; j < 9; j++) {
-            int v = m_g[i][j];
-            if (v != 0) {
-                uint64_t code = (uint64_t)(i * 9 + j + 1) * 3ULL + (v == 1 ? 1ULL : 2ULL);
-                h ^= melangeHash(code);
-            }
-        }
-    }
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 3; j++) {
-            int v = m_e[i][j];
-            if (v != 0) {
-                uint64_t code = 300ULL + (uint64_t)(i * 3 + j + 1) * 5ULL + (uint64_t)(v + 2);
-                h ^= melangeHash(code);
-            }
-        }
-    }
+    uint64_t h = 0x123456789abcdef0ULL ^ m_hashBase;
     h ^= melangeHash(500ULL + (uint64_t)((last.row + 1) * 16 + (last.col + 1)));
     h ^= melangeHash(700ULL + (joueur == 1 ? 1ULL : 2ULL));
     return h;
