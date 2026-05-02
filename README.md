@@ -158,8 +158,43 @@ donc rollback.
 - ne pas reprendre le hash incremental simple sans autre changement (`step8` a regresse)
 - ne pas utiliser le remplacement TT profondeur d'abord simple (`step9` a fortement regresse)
 - ne pas utiliser le tri racine par scores TT simple (`step10` a regresse)
-- prochaine piste conseillee: instrumenter la TT sur une partie debug avant de retoucher Palier 3
+- instrumentation TT ajoutee sous `-DTT_STATS`; prochaine piste conseillee: analyser ces compteurs avant de retoucher Palier 3
 - ajouter un `.gitignore` pour `bin/`, `obj/`, executables et fichiers temporaires
+
+## Instrumentation TT (2026-05-02)
+
+Instrumentation active uniquement avec `-DTT_STATS`, sans effet attendu sur le build normal.
+Run court VM `MEDIUM_2` instrumente: `run_med2_ttstats_20.log`.
+
+Commande build instrumentee:
+
+```bash
+g++ -std=c++17 -O2 -fno-lto -DTT_STATS main.cpp Plateau.cpp -L. -lUTTTLib allegro_font-5.2.dll allegro_ttf-5.2.dll allegro_image-5.2.dll allegro_primitives-5.2.dll allegro-5.2.dll -o ia_stats.exe
+```
+
+Synthese sur 515 coups joueur instrumentes:
+
+| Metrique | Valeur |
+|---|---:|
+| Probes TT | 3,189,652 |
+| Hits TT | 871,198 |
+| Hit rate | 27.31% |
+| Hits utilisables pour retourner un score | 34,099 |
+| Usable / hits | 3.91% |
+| Usable / probes | 1.07% |
+| Collisions / probes | 0.25% |
+| TT bestMove legal / known | 96.09% |
+| TT bestMove premier apres tri / legal | 99.97% |
+| Coupures premier coup / coupures | 74.55% |
+| Profondeur moyenne des hits | 1.51 |
+| Profondeur moyenne complete par coup | 6.48 |
+
+Lecture:
+
+- la TT retrouve des entrees assez souvent, mais elles sont rarement assez profondes ou assez fortes pour retourner un score directement
+- l'effet principal de la TT actuelle est le move ordering: le meilleur coup TT est presque toujours legal et premier apres tri
+- les collisions sont faibles; augmenter la taille de table n'est probablement pas prioritaire
+- avant toute nouvelle variante Palier 3, il vaut mieux comprendre pourquoi les hits restent peu utilisables
 
 ## Sources -> Partie du code utilisee
 

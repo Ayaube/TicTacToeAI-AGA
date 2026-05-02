@@ -74,6 +74,7 @@ Conclusion: les reglages d'evaluation et les heuristiques racine ont souvent deg
 - Le hash incremental simple (`step8`) gardait la meme formule de cle mais maintenait grille/meta en O(1); il a fait `20/70/10`, soit `22.22%`, donc il a aussi ete revert.
 - Le remplacement TT profondeur d'abord (`step9`) a fait `14/78/8`, soit `15.22%`, donc garder les entrees profondes au lieu de remplacer simplement n'aide pas ici.
 - Le tri racine par scores TT (`step10`) a fait `18/77/5`, soit `18.95%`; le simple swap du meilleur coup apres chaque iteration reste meilleur.
+- Instrumentation TT disponible avec `-DTT_STATS`; premier run court: hit rate `27.31%`, usable/hits `3.91%`, collision rate `0.25%`, first-move cutoff `74.55%`.
 
 ## Pistes serieuses pour la suite
 
@@ -127,9 +128,33 @@ Interpretation possible:
 ### 4. Pistes TT restantes prudentes
 
 Pistes possibles, a tester une par une:
-- instrumenter quelques compteurs TT (hits, exact, bornes, remplacements) sur une partie debug avant de retoucher la politique
+- exploiter l'instrumentation TT deja ajoutee avec `-DTT_STATS`
+- cibler le faible taux de hits utilisables (`3.91%` des hits sur le premier run), pas la taille de table
 - tester un bonus TT interne plus modere que `100000`, seulement si les compteurs montrent une sur-priorisation
 - eviter les changements aveugles de tri racine: `step10` a regresse.
+
+### Stats TT de reference
+
+Run: `run_med2_ttstats_20.log`, `MEDIUM_2`, Arena court instrumente.
+
+Synthese:
+- lignes `[TT]`: 515
+- probes: 3,189,652
+- hits: 871,198 (`27.31%`)
+- usable: 34,099 (`3.91%` des hits, `1.07%` des probes)
+- exact/lower/upper returns: 937 / 28,959 / 4,203
+- stores: 3,145,574
+- collisions: 7,972 (`0.25%`)
+- TT bestMove legal/known: `96.09%`
+- TT bestMove first/legal: `99.97%`
+- first-move cutoff rate: `74.55%`
+- avg hit depth: `1.51`
+- avg completed depth: `6.48`
+
+Lecture:
+- collisions faibles: agrandir la TT n'est probablement pas le premier levier
+- meilleur coup TT deja tres dominant dans le tri interne
+- tres peu de hits retournent un score directement; la TT actuelle agit surtout comme heuristique d'ordonnancement.
 
 ### 5. Best move TT a la racine
 
