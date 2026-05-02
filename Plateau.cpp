@@ -46,10 +46,6 @@ static bool tempsEcoule() {
 Plateau::Plateau() {
     for (auto& r : m_g) r.fill(0);
     for (auto& r : m_e) r.fill(0);
-    // La TT reste utile entre deux coups d'une meme partie, mais on repart
-    // proprement lorsqu'un nouveau Plateau est cree pour une nouvelle partie.
-    g_ttGeneration++;
-    if (g_ttGeneration == 0) g_ttGeneration = 1;
 }
 Plateau::~Plateau() {}
 
@@ -514,6 +510,8 @@ void Plateau::prochainMove(GameMove& myMove, GameMove& lastMove) {
     vector<GameMove> coups = getCoupsLegaux(lastMove); // tri initial
     int n = (int)coups.size();
     if (n == 0) return;
+    g_ttGeneration++;
+    if (g_ttGeneration == 0) g_ttGeneration = 1;
 
     // Etape tactique 1:
     // 1) jouer le gain meta immediat s'il existe
