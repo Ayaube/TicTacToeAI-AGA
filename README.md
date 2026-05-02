@@ -32,6 +32,8 @@ Points en place:
 - `main.cpp`: boucle de jeu + configuration d'execution
 - `Plateau.h/.cpp`: logique UTTT, generation des coups, evaluation, minimax
 - `main.h`: interface fournie par la lib du template
+- `SOUTENANCE-PREPARATION.md`: support detaille pour l'oral, avec choix techniques,
+  resultats, regressions et plan de soutenance
 
 ## Lancement (usage applicatif)
 
