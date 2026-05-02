@@ -29,28 +29,6 @@ static const size_t TT_SIZE = 1 << 20;
 static vector<TTEntry> g_transpositionTable(TT_SIZE);
 static unsigned int g_ttGeneration = 1;
 
-static bool doitRemplacerTT(const TTEntry& entry, int depth) {
-    if (entry.generation != g_ttGeneration || entry.flag == TTFlag::VIDE) {
-        return true;
-    }
-    return depth >= entry.depth;
-}
-
-static void stockerTT(TTEntry& entry, uint64_t key, int depth, int score,
-                      const GameMove& bestMove, int alphaDepart, int betaDepart)
-{
-    if (!doitRemplacerTT(entry, depth)) return;
-
-    entry.key = key;
-    entry.depth = depth;
-    entry.score = score;
-    entry.bestMove = bestMove;
-    entry.generation = g_ttGeneration;
-    if (score <= alphaDepart) entry.flag = TTFlag::BORNE_HAUTE;
-    else if (score >= betaDepart) entry.flag = TTFlag::BORNE_BASSE;
-    else entry.flag = TTFlag::EXACT;
-}
-
 static uint64_t melangeHash(uint64_t x) {
     x += 0x9e3779b97f4a7c15ULL;
     x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;
@@ -492,7 +470,14 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
             if (best > alpha) alpha = best;
             if (beta <= alpha) break;
         }
-        stockerTT(entry, key, depth, best, bestMove, alphaDepart, betaDepart);
+        entry.key = key;
+        entry.depth = depth;
+        entry.score = best;
+        entry.bestMove = bestMove;
+        entry.generation = g_ttGeneration;
+        if (best <= alphaDepart) entry.flag = TTFlag::BORNE_HAUTE;
+        else if (best >= betaDepart) entry.flag = TTFlag::BORNE_BASSE;
+        else entry.flag = TTFlag::EXACT;
         return best;
     } else {
         int best = numeric_limits<int>::max();
@@ -506,7 +491,14 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
             if (best < beta) beta = best;
             if (beta <= alpha) break;
         }
-        stockerTT(entry, key, depth, best, bestMove, alphaDepart, betaDepart);
+        entry.key = key;
+        entry.depth = depth;
+        entry.score = best;
+        entry.bestMove = bestMove;
+        entry.generation = g_ttGeneration;
+        if (best <= alphaDepart) entry.flag = TTFlag::BORNE_HAUTE;
+        else if (best >= betaDepart) entry.flag = TTFlag::BORNE_BASSE;
+        else entry.flag = TTFlag::EXACT;
         return best;
     }
 }
