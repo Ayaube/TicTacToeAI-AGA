@@ -29,6 +29,74 @@ static const size_t TT_SIZE = 1 << 20;
 static vector<TTEntry> g_transpositionTable(TT_SIZE);
 static unsigned int g_ttGeneration = 1;
 
+#ifdef TT_STATS
+struct TTStats {
+    long long nodes = 0;
+    long long probes = 0;
+    long long hits = 0;
+    long long usable = 0;
+    long long exact = 0;
+    long long lower = 0;
+    long long upper = 0;
+    long long stores = 0;
+    long long collisions = 0;
+    long long ttMoveKnown = 0;
+    long long ttMoveLegal = 0;
+    long long ttMoveFirst = 0;
+    long long cutoffs = 0;
+    long long cutoffsFirstMove = 0;
+    long long depthHitSum = 0;
+};
+
+static TTStats g_ttStats;
+
+static void resetTTStats() {
+    g_ttStats = TTStats{};
+}
+
+static bool moveValideStats(const GameMove& move) {
+    return move.row >= 0 && move.row < 9 && move.col >= 0 && move.col < 9;
+}
+
+static double ratioStats(long long a, long long b) {
+    return b > 0 ? (100.0 * (double)a / (double)b) : 0.0;
+}
+
+static void afficherTTStats(const GameMove& move, int profMax, bool timeout) {
+    double avgHitDepth = g_ttStats.hits > 0
+        ? (double)g_ttStats.depthHitSum / (double)g_ttStats.hits
+        : 0.0;
+    cerr << "[TT]"
+         << " move=" << move.row << "," << move.col
+         << " profMax=" << profMax
+         << " nodes=" << g_ttStats.nodes
+         << " probes=" << g_ttStats.probes
+         << " hits=" << g_ttStats.hits
+         << " hitRate=" << ratioStats(g_ttStats.hits, g_ttStats.probes)
+         << " usable=" << g_ttStats.usable
+         << " usableRate=" << ratioStats(g_ttStats.usable, g_ttStats.hits)
+         << " exact=" << g_ttStats.exact
+         << " lower=" << g_ttStats.lower
+         << " upper=" << g_ttStats.upper
+         << " stores=" << g_ttStats.stores
+         << " collisions=" << g_ttStats.collisions
+         << " collisionRate=" << ratioStats(g_ttStats.collisions, g_ttStats.probes)
+         << " ttMoveKnown=" << g_ttStats.ttMoveKnown
+         << " ttMoveLegal=" << g_ttStats.ttMoveLegal
+         << " ttMoveFirst=" << g_ttStats.ttMoveFirst
+         << " ttMoveFirstRate=" << ratioStats(g_ttStats.ttMoveFirst, g_ttStats.ttMoveLegal)
+         << " cutoffs=" << g_ttStats.cutoffs
+         << " cutoffsFirst=" << g_ttStats.cutoffsFirstMove
+         << " firstCutoffRate=" << ratioStats(g_ttStats.cutoffsFirstMove, g_ttStats.cutoffs)
+         << " avgHitDepth=" << avgHitDepth
+         << " timeout=" << (timeout ? 1 : 0)
+         << "\n";
+}
+#else
+static void resetTTStats() {}
+static void afficherTTStats(const GameMove&, int, bool) {}
+#endif
+
 static uint64_t melangeHash(uint64_t x) {
     x += 0x9e3779b97f4a7c15ULL;
     x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9ULL;
@@ -416,6 +484,9 @@ int Plateau::evaluer() {
 //  Le tri dans minimax utilise un tableau local (tri par insertion)
 // ============================================================
 int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) {
+#ifdef TT_STATS
+    g_ttStats.nodes++;
+#endif
     if (tempsEcoule()) return evaluer();
 
     int v = gagnantMetaGrille();
@@ -427,18 +498,61 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
     int betaDepart = beta;
     uint64_t key = hashEtat(last, joueur);
     TTEntry& entry = g_transpositionTable[key & (TT_SIZE - 1)];
+#ifdef TT_STATS
+    g_ttStats.probes++;
+    if (entry.generation == g_ttGeneration && entry.flag != TTFlag::VIDE && entry.key != key) {
+        g_ttStats.collisions++;
+    }
+#endif
     bool entreeConnue = (entry.generation == g_ttGeneration && entry.flag != TTFlag::VIDE && entry.key == key);
     GameMove coupTT{-1, -1};
-    if (entreeConnue) coupTT = entry.bestMove;
+    if (entreeConnue) {
+        coupTT = entry.bestMove;
+#ifdef TT_STATS
+        g_ttStats.hits++;
+        g_ttStats.depthHitSum += entry.depth;
+        if (moveValideStats(coupTT)) g_ttStats.ttMoveKnown++;
+#endif
+    }
     if (entreeConnue && entry.depth >= depth) {
-        if (entry.flag == TTFlag::EXACT) return entry.score;
-        if (entry.flag == TTFlag::BORNE_BASSE && entry.score >= beta) return entry.score;
-        if (entry.flag == TTFlag::BORNE_HAUTE && entry.score <= alpha) return entry.score;
+        if (entry.flag == TTFlag::EXACT) {
+#ifdef TT_STATS
+            g_ttStats.usable++;
+            g_ttStats.exact++;
+#endif
+            return entry.score;
+        }
+        if (entry.flag == TTFlag::BORNE_BASSE && entry.score >= beta) {
+#ifdef TT_STATS
+            g_ttStats.usable++;
+            g_ttStats.lower++;
+#endif
+            return entry.score;
+        }
+        if (entry.flag == TTFlag::BORNE_HAUTE && entry.score <= alpha) {
+#ifdef TT_STATS
+            g_ttStats.usable++;
+            g_ttStats.upper++;
+#endif
+            return entry.score;
+        }
     }
 
     GameMove buf[MAX_MOVES];
     int n = getCoupsLegauxFast(last, buf);
     if (n == 0) return evaluer();
+#ifdef TT_STATS
+    bool coupTTLegal = false;
+    if (moveValideStats(coupTT)) {
+        for (int k = 0; k < n; k++) {
+            if (buf[k].row == coupTT.row && buf[k].col == coupTT.col) {
+                coupTTLegal = true;
+                g_ttStats.ttMoveLegal++;
+                break;
+            }
+        }
+    }
+#endif
 
     // Tri par insertion (zero allocation, efficace pour n <= ~20 coups typiques)
     // On ne trie que si depth > 1 pour amortir le cout
@@ -457,6 +571,11 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
             buf[kk+1] = cm; scores[kk+1] = cs;
         }
     }
+#ifdef TT_STATS
+    if (coupTTLegal && n > 0 && buf[0].row == coupTT.row && buf[0].col == coupTT.col) {
+        g_ttStats.ttMoveFirst++;
+    }
+#endif
 
     if (joueur == 1) {
         int best = numeric_limits<int>::min();
@@ -468,8 +587,17 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
             annulerCoup(buf[k].row, buf[k].col, anc);
             if (s > best) { best = s; bestMove = buf[k]; }
             if (best > alpha) alpha = best;
-            if (beta <= alpha) break;
+            if (beta <= alpha) {
+#ifdef TT_STATS
+                g_ttStats.cutoffs++;
+                if (k == 0) g_ttStats.cutoffsFirstMove++;
+#endif
+                break;
+            }
         }
+#ifdef TT_STATS
+        g_ttStats.stores++;
+#endif
         entry.key = key;
         entry.depth = depth;
         entry.score = best;
@@ -489,8 +617,17 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
             annulerCoup(buf[k].row, buf[k].col, anc);
             if (s < best) { best = s; bestMove = buf[k]; }
             if (best < beta) beta = best;
-            if (beta <= alpha) break;
+            if (beta <= alpha) {
+#ifdef TT_STATS
+                g_ttStats.cutoffs++;
+                if (k == 0) g_ttStats.cutoffsFirstMove++;
+#endif
+                break;
+            }
         }
+#ifdef TT_STATS
+        g_ttStats.stores++;
+#endif
         entry.key = key;
         entry.depth = depth;
         entry.score = best;
@@ -512,6 +649,7 @@ void Plateau::prochainMove(GameMove& myMove, GameMove& lastMove) {
     if (n == 0) return;
     g_ttGeneration++;
     if (g_ttGeneration == 0) g_ttGeneration = 1;
+    resetTTStats();
 
     // Etape tactique 1:
     // 1) jouer le gain meta immediat s'il existe
@@ -519,6 +657,7 @@ void Plateau::prochainMove(GameMove& myMove, GameMove& lastMove) {
     for (const GameMove& c : coups) {
         if (coupDonneVictoireMeta(c, 1)) {
             myMove = c;
+            afficherTTStats(myMove, 0, false);
             return;
         }
     }
@@ -537,16 +676,21 @@ void Plateau::prochainMove(GameMove& myMove, GameMove& lastMove) {
 
     g_debut  = steady_clock::now();
     myMove   = coups[0]; // meilleur par defaut (tri heuristique)
+    int profMaxComplete = 0;
+    bool timeout = false;
 
     for (int prof = 1; prof <= PROFONDEUR_MAX; prof++) {
-        if (tempsEcoule()) break;
+        if (tempsEcoule()) {
+            timeout = true;
+            break;
+        }
 
         int bestScore = numeric_limits<int>::min();
         int bestIdx   = 0;
         bool complet  = true;
 
         for (int k = 0; k < n; k++) {
-            if (tempsEcoule()) { complet = false; break; }
+            if (tempsEcoule()) { complet = false; timeout = true; break; }
             int anc = jouerCoup(coups[k].row, coups[k].col, 1);
             int s   = minimax(coups[k], prof-1,
                               numeric_limits<int>::min(),
@@ -557,9 +701,11 @@ void Plateau::prochainMove(GameMove& myMove, GameMove& lastMove) {
 
         if (complet) {
             myMove = coups[bestIdx];
+            profMaxComplete = prof;
             // Remonter le meilleur coup en tete pour la prochaine iteration
             if (bestIdx > 0) swap(coups[0], coups[bestIdx]);
             cerr << "[IDA] prof=" << prof << " score=" << bestScore << "\n";
         }
     }
+    afficherTTStats(myMove, profMaxComplete, timeout);
 }
