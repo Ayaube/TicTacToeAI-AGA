@@ -12,6 +12,7 @@ Date: 2026-05-02
 - Derniere piste testee: `step7` TT persistante entre coups, regression a `20.21%`, rollback applique
 - Autre piste testee: `step8` hash incremental, regression a `22.22%`, rollback applique
 - Autre piste testee: `step9` remplacement TT profondeur d'abord, regression a `15.22%`, rollback applique
+- Autre piste testee: `step10` tri racine avec table, regression a `18.95%`, rollback applique
 - Objectif final: valider `MEDIUM_2` a 80% en mode Arena (egalites exclues)
 
 ## Resultats importants
@@ -33,8 +34,9 @@ Date: 2026-05-02
 | `step7` | TT conservee entre coups | 20.21% |
 | `step8` | hash incremental | 22.22% |
 | `step9` | remplacement TT profondeur d'abord | 15.22% |
+| `step10` | tri racine par scores TT | 18.95% |
 
-Conclusion: les reglages d'evaluation et les heuristiques racine ont souvent degrade. Le seul axe qui a donne un gain net est la table de transposition, mais la conservation simple entre coups, le hash incremental simple et le remplacement profondeur d'abord ont regresse.
+Conclusion: les reglages d'evaluation et les heuristiques racine ont souvent degrade. Le seul axe qui a donne un gain net est la table de transposition, mais la conservation simple entre coups, le hash incremental simple, le remplacement profondeur d'abord et le tri racine par scores TT ont regresse.
 
 ## Ce qui est implemente dans `step6b`
 
@@ -71,6 +73,7 @@ Conclusion: les reglages d'evaluation et les heuristiques racine ont souvent deg
 - Cette invalidation par coup doit rester en place pour l'instant: le test `step7` qui gardait la TT pendant toute la partie a fait `19/75/6`, soit `20.21%`.
 - Le hash incremental simple (`step8`) gardait la meme formule de cle mais maintenait grille/meta en O(1); il a fait `20/70/10`, soit `22.22%`, donc il a aussi ete revert.
 - Le remplacement TT profondeur d'abord (`step9`) a fait `14/78/8`, soit `15.22%`, donc garder les entrees profondes au lieu de remplacer simplement n'aide pas ici.
+- Le tri racine par scores TT (`step10`) a fait `18/77/5`, soit `18.95%`; le simple swap du meilleur coup apres chaque iteration reste meilleur.
 
 ## Pistes serieuses pour la suite
 
@@ -124,20 +127,21 @@ Interpretation possible:
 ### 4. Pistes TT restantes prudentes
 
 Pistes possibles, a tester une par une:
-- appliquer le meilleur coup TT au tri racine dans `prochainMove`
-- tester un bonus TT interne plus modere que `100000`
-- instrumenter quelques compteurs TT (hits, exact, bornes, remplacements) sur une partie debug avant de retoucher la politique.
+- instrumenter quelques compteurs TT (hits, exact, bornes, remplacements) sur une partie debug avant de retoucher la politique
+- tester un bonus TT interne plus modere que `100000`, seulement si les compteurs montrent une sur-priorisation
+- eviter les changements aveugles de tri racine: `step10` a regresse.
 
 ### 5. Best move TT a la racine
 
-Idee: appliquer explicitement le meilleur coup TT au tri des coups dans `prochainMove`, pas seulement dans les noeuds internes de `minimax`.
+Idee testee partiellement par `step10`: utiliser la TT a la racine pour trier les coups avec les scores enfants de l'iteration precedente.
 
 Pourquoi c'est raisonnable:
 - l'approfondissement iteratif remonte deja le meilleur coup en tete
 - mais le meilleur coup TT pourrait aider les coups racine au debut d'une nouvelle profondeur
 
-Risque:
-- gain probablement faible
+Resultat:
+- regression a `18.95%`
+- ne pas reprendre cette forme simple.
 
 ### 6. Historique de coups tres leger
 

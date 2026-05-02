@@ -117,6 +117,7 @@ Campagnes lancees en mode `arena` via tache interactive, puis parsing des logs.
 | `MEDIUM_2` | step7 `m2 garde la table entre coups` | 100 | 19 | 75 | 6 | 20.21% | KO |
 | `MEDIUM_2` | step8 `m2 ajoute hash incremental` | 100 | 20 | 70 | 10 | 22.22% | KO |
 | `MEDIUM_2` | step9 `m2 remplace tt par profondeur` | 100 | 14 | 78 | 8 | 15.22% | KO |
+| `MEDIUM_2` | step10 `m2 trie racine avec table` | 100 | 18 | 77 | 5 | 18.95% | KO |
 
 Note: dans les logs, les egalites apparaissent comme `IA AND PLAYER`.
 Conclusion provisoire: `step6b` reste la meilleure variante testee a date (`23.16%`).
@@ -132,6 +133,8 @@ rollback vers la generation incrementee a chaque `prochainMove`.
 Le `step8` (hash incremental sans changer la formule de cle) regresse legerement
 vs `step6b`, donc rollback egalement.
 Le `step9` (remplacement TT profondeur d'abord) regresse fortement, donc rollback.
+Le `step10` (tri racine avec scores TT de l'iteration precedente) regresse aussi,
+donc rollback.
 
 ## Iteration en cours (Palier 3)
 
@@ -154,7 +157,8 @@ Le `step9` (remplacement TT profondeur d'abord) regresse fortement, donc rollbac
 - ne pas conserver la table de transposition entre coups dans l'etat actuel (`step7` a regresse)
 - ne pas reprendre le hash incremental simple sans autre changement (`step8` a regresse)
 - ne pas utiliser le remplacement TT profondeur d'abord simple (`step9` a fortement regresse)
-- envisager plutot une meilleure exploitation du meilleur coup TT ou une autre piste tres ciblee
+- ne pas utiliser le tri racine par scores TT simple (`step10` a regresse)
+- prochaine piste conseillee: instrumenter la TT sur une partie debug avant de retoucher Palier 3
 - ajouter un `.gitignore` pour `bin/`, `obj/`, executables et fichiers temporaires
 
 ## Sources -> Partie du code utilisee
