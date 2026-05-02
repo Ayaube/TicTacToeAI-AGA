@@ -1,14 +1,15 @@
 # Handoff - Medium 2 / Palier 3 TT
 
-Date: 2026-05-01
+Date: 2026-05-02
 
 ## Etat actuel
 
 - Branche a reprendre: `ayoub_medium2_tt`
 - Remote: `origin/ayoub_medium2_tt`
-- Dernier commit utile: `b955909` (`m2 palier3 retour profondeur 9`)
+- Dernier commit utile pour le code: `b955909` (`m2 palier3 retour profondeur 9`)
 - Base stable avant TT: `step1` (`95b018b`) avec `21.65%` contre `MEDIUM_2`
 - Meilleure version actuelle: `step6b`, table de transposition + meilleur coup priorise, `23.16%`
+- Derniere piste testee: `step7` TT persistante entre coups, regression a `20.21%`, rollback applique
 - Objectif final: valider `MEDIUM_2` a 80% en mode Arena (egalites exclues)
 
 ## Resultats importants
@@ -27,8 +28,9 @@ Date: 2026-05-01
 | `step6` | TT simple | 21.88% |
 | `step6b` | TT + meilleur coup priorise | 23.16% |
 | `step6c` | TT + profondeur 11 | 22.11% |
+| `step7` | TT conservee entre coups | 20.21% |
 
-Conclusion: les reglages d'evaluation et les heuristiques racine ont souvent degrade. Le seul axe qui a donne un gain net est la table de transposition.
+Conclusion: les reglages d'evaluation et les heuristiques racine ont souvent degrade. Le seul axe qui a donne un gain net est la table de transposition, mais la conservation simple entre coups a regresse.
 
 ## Ce qui est implemente dans `step6b`
 
@@ -62,26 +64,25 @@ Conclusion: les reglages d'evaluation et les heuristiques racine ont souvent deg
   Ces garde-fous ont ete utiles statistiquement jusqu'ici.
 - La TT actuelle est volontairement simple. Elle n'est pas un Zobrist incremental.
 - La generation TT est incrementee a chaque coup joueur (`prochainMove`), donc la table est surtout utile pendant l'approfondissement iteratif d'un coup donne.
+- Cette invalidation par coup doit rester en place pour l'instant: le test `step7` qui gardait la TT pendant toute la partie a fait `19/75/6`, soit `20.21%`.
 
 ## Pistes serieuses pour la suite
 
-### 1. Conserver la TT entre coups
+### 1. Ne pas conserver simplement la TT entre coups
 
-Idee: ne pas invalider toute la table a chaque `prochainMove`. Le hash contient deja le plateau complet, `lastMove` et le joueur courant, donc certaines entrees d'une recherche precedente peuvent rester valides.
+Idee testee le 2026-05-02: ne pas invalider toute la table a chaque `prochainMove`, mais seulement a la creation d'un nouveau `Plateau`.
 
-Pourquoi c'est prometteur:
+Pourquoi c'etait prometteur:
 - pendant notre coup N, la recherche explore souvent les reponses adverses possibles
 - au coup N+1, l'etat reel peut etre un etat deja explore
 - cela donne plus de valeur a l'approfondissement iteratif et a la TT
 
-Risque:
-- collisions plus visibles si la table vit plus longtemps
-- il faut garder une politique de remplacement simple et robuste
-
-Implementation minimale:
-- supprimer ou adoucir `g_ttGeneration++` dans `prochainMove`
-- garder `generation` seulement pour pouvoir reset au debut d'une partie si necessaire
-- benchmark 100 parties
+Resultat:
+- commit teste: `052513c` (`m2 garde la table entre coups`)
+- benchmark: `run_med2_step7_ttpersist.log`
+- stats: 100 starts, 19 wins, 75 losses, 6 draws
+- score hors egalites: `20.21%`
+- decision: rollback, ne pas reprendre cette variante simple sans changer la politique de remplacement/hash.
 
 ### 2. Ajouter un vrai Zobrist incremental
 

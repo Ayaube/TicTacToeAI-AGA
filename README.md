@@ -114,9 +114,10 @@ Campagnes lancees en mode `arena` via tache interactive, puis parsing des logs.
 | `MEDIUM_2` | step6 `m2 palier3 table transposition simple` | 100 | 21 | 75 | 3 | 21.88% | KO |
 | `MEDIUM_2` | step6b `m2 palier3 priorise meilleur coup table` | 100 | 22 | 73 | 5 | 23.16% | KO |
 | `MEDIUM_2` | step6c `m2 palier3 augmente profondeur max` | 100 | 21 | 74 | 5 | 22.11% | KO |
+| `MEDIUM_2` | step7 `m2 garde la table entre coups` | 100 | 19 | 75 | 6 | 20.21% | KO |
 
 Note: dans les logs, les egalites apparaissent comme `IA AND PLAYER`.
-Conclusion provisoire: `step1` reste la meilleure variante testee a date (`21.65%`).
+Conclusion provisoire: `step6b` reste la meilleure variante testee a date (`23.16%`).
 Le `step3b` (ANY_BOARD seul) n'apporte pas de gain net par rapport a `step1`, donc
 pas d'integration de `Killer Moves` a ce stade.
 Le `step4` (Palier 1 sans filtres racine) est aussi en regression.
@@ -124,11 +125,13 @@ Les variantes `step4a`, `step4b` et `step5` ont aussi regresse.
 Le `step6` (table de transposition simple) apporte un petit gain net vs `step1`.
 Le `step6b` confirme le Palier 3 avec le meilleur score actuel (`23.16%`).
 Le `step6c` (profondeur 11) regresse vs `step6b`, donc retour a profondeur 9.
+Le `step7` (conservation de la TT entre coups d'une partie) regresse aussi, donc
+rollback vers la generation incrementee a chaque `prochainMove`.
 
 ## Iteration en cours (Palier 3)
 
 - Branche dediee: `ayoub_medium2_tt`
-- Meilleur commit actuel: `b955909`
+- Meilleur code actuel: `b955909` (la branche a ensuite documente et revert les essais regressifs)
 - Meilleure variante: `step6b` (table de transposition + meilleur coup priorise)
 - Score actuel a battre: `23.16%` contre `MEDIUM_2`
 - Handoff detaille: `HANDOFF-TT.md`
@@ -143,7 +146,7 @@ Le `step6c` (profondeur 11) regresse vs `step6b`, donc retour a profondeur 9.
 ## Reste a faire
 
 - continuer sur `ayoub_medium2_tt`
-- tester la conservation de la table de transposition entre coups
+- ne pas conserver la table de transposition entre coups dans l'etat actuel (`step7` a regresse)
 - envisager un Zobrist incremental si la TT reste prometteuse
 - ajouter un `.gitignore` pour `bin/`, `obj/`, executables et fichiers temporaires
 
