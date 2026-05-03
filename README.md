@@ -1,120 +1,115 @@
-# Ultimate Tic-Tac-Toe - Projet IA (ESILV A3)
+# Ultimate Tic-Tac-Toe - Dossier Soutenance (version simple)
 
-## Objectif
-Coder une IA en C++ (POO) capable d'affronter les IA du sujet sur plusieurs niveaux:
+## Objectif du projet
+Construire une IA C++ capable de jouer a Ultimate Tic-Tac-Toe contre les niveaux fournis par le sujet.
 
-- `EASY_1`, `EASY_2`
-- `MEDIUM_1`, `MEDIUM_2`
-- `HARD_1`, `HARD_2`
-- `VERY_HARD_1`, `VERY_HARD_2`
+Critere de validation d'un niveau:
+- au moins 80% de victoires en mode Arena
+- egalites exclues du calcul
 
-Validation d'un niveau: au moins 80% de victoires en mode Arena (hors egalites).
+## Version retenue pour la soutenance
+Cette version est volontairement simple a expliquer.
 
-## Etat de la branche `ayoub`
+- Branche cible: `main`
+- Base technique: logique `ayoub`
+- Point cle: code assez court, lisible, sans heuristiques avancees difficiles a justifier a l'oral
 
-Cette branche est le nouveau point de depart technique:
+## Resultat de reference (MEDIUM_1)
+Campagne de validation executee sur VM Windows cible (meme environnement que le rendu), date du 3 mai 2026.
 
-- base fusionnee depuis `Antoine`
-- port manuel limite de correctifs utiles depuis `gabin`
-- code garde volontairement simple et lisible
+- starts: 100
+- wins: 100
+- losses: 0
+- draws: 0
+- taux hors egalites: 100.00%
 
-Points en place:
+Log de reference:
+- local: `test-logs/run_med1_soutenance_100done.log`
+- VM: `C:\Users\ayoub\projets\Projet\TicTacToeAI-AGA\run_med1_soutenance_100done.log`
 
-- gestion propre des coups legaux selon `lastMove`
-- minimax + alpha-beta
-- approfondissement iteratif
-- heuristique meta-grille + sous-grilles
-- gestion des sous-plateaux termines (victoire ou nul local)
-- `main.cpp` clarifie et parametre (mode/niveau/nb parties)
+## Ce qui a change par rapport au template du prof
+Le template du prof fournit surtout l'interface de jeu (`IGame`, `getMove`, `setMove`) et le squelette.
 
-## Organisation des fichiers
+Les ajouts majeurs de notre cote sont:
 
-- `main.cpp`: boucle de jeu + configuration d'execution
-- `Plateau.h/.cpp`: logique UTTT, generation des coups, evaluation, minimax
-- `main.h`: interface fournie par la lib du template
+1. Representation complete du plateau UTTT
+- grille 9x9 des cases
+- meta-grille 3x3 des sous-plateaux
+- prise en compte des sous-plateaux gagnes ET des sous-plateaux nuls
 
-## Lancement (usage applicatif)
+2. Generation correcte des coups legaux
+- respect de la redirection par `lastMove`
+- bascule en mode `ANY_BOARD` quand la sous-grille cible est terminee
 
-Le programme accepte des arguments:
+3. IA de recherche classique et defendable
+- minimax
+- alpha-beta
+- approfondissement iteratif borne par temps
+- tri simple des coups pour ameliorer les coupures
 
-```bash
-./UTTT_Template [mode] [level] [nbGames] [alwaysFirst] [alias]
-```
+4. Evaluation heuristique lisible
+- poids fort sur la meta-grille
+- menaces a 2 alignes
+- bonus positionnels centre/coins
+- score local des sous-grilles non terminees
 
-- `mode`: `arena` ou `debug` (defaut `arena`)
-- `level`: `easy1`, `easy2`, `med1`, `med2`, `hard1`, `hard2`, `vhard1`, `vhard2` (defaut `med1`)
-- `nbGames`: entier > 0 (defaut `100`)
-- `alwaysFirst`: `0` ou `1` (defaut `0`)
-- `alias`: nom affiche (defaut `AGA`)
+5. Petite couche tactique en racine (simple a expliquer)
+- jouer un coup qui gagne la meta-grille immediatement si disponible
+- eviter les coups qui donnent une victoire meta immediate a l'adversaire
 
-Exemples:
+## Pipeline d'un coup IA (explication orale)
+A chaque tour:
 
-```bash
-./UTTT_Template arena med1 100 0 AGA
-./UTTT_Template debug hard1 10 1 AGA
-```
+1. Lire le dernier coup adverse
+2. Recalculer les coups legaux
+3. Si victoire meta immediate possible: la jouer
+4. Sinon retirer les coups qui donnent une victoire meta immediate adverse
+5. Lancer iterative deepening (minimax + alpha-beta) jusqu'a la limite de temps
+6. Envoyer le meilleur coup trouve
 
-## Build Windows (VM `win-dev`)
+## Pourquoi cette version est la plus pratique a soutenir
+- pas de mecanismes avances (pas de Zobrist, pas de TT, pas de PVS/LMR)
+- comportement stable et reproductible
+- architecture claire: `main.cpp` pilote, `Plateau.cpp` contient les regles + IA
+- resultat MEDIUM_1 tres au-dessus du seuil de 80%
 
-Commande qui fonctionne sur la VM:
+## Structure des fichiers
+- `main.cpp`: boucle de jeu et config de demo (MEDIUM_1)
+- `Plateau.h/.cpp`: regles UTTT, coups legaux, evaluation, minimax
+- `main.h`: interface du moteur fourni
+- `test-logs/`: traces de campagnes
 
-```bash
-g++ -std=c++17 -O2 -fno-lto main.cpp Plateau.cpp -L. -lUTTTLib allegro_font-5.2.dll allegro_ttf-5.2.dll allegro_image-5.2.dll allegro_primitives-5.2.dll allegro-5.2.dll -o ia_local.exe
+## Execution (version soutenance)
+Cette version lance directement une campagne `MEDIUM_1` en Arena.
+
+Initialisation utilisee:
+- nbGames: 100
+- level: MEDIUM_1
+- mode: ARENA
+- alwaysPlayFirst: false
+- alias: AGA
+
+## Build VM Windows (reference)
+Commande utilisee sur la VM:
+
+```bat
+g++ -std=c++17 -O2 -fno-lto main.cpp Plateau.cpp -L. -lUTTTLib allegro_font-5.2.dll allegro_ttf-5.2.dll allegro_image-5.2.dll allegro_primitives-5.2.dll allegro-5.2.dll -o ia_soutenance.exe
 ```
 
 Note:
-- sans `-fno-lto`, la compilation echoue (mismatch LTO avec `libUTTTLib.a`)
+- sans `-fno-lto`, echec de link avec `libUTTTLib.a`
 
-## Execution via SSH (VM)
-
-Execution directe en SSH:
-- ne marche pas avec Allegro (`Failed to create display!`)
-
-Execution qui marche:
-- lancer l'exe via une tache planifiee interactive (`schtasks /IT`)
-- rediriger la sortie vers un fichier log
-
-Exemple:
+## Run VM via tache interactive (SSH)
+Execution directe en SSH ne cree pas le display Allegro.
+La methode fiable est la tache interactive:
 
 ```bat
-schtasks /Create /TN UTTT_Run /SC ONCE /ST 23:59 /TR "cmd /c cd /d C:\Users\ayoub\projets\Projet\TicTacToeAI-AGA && ia_local.exe arena med1 1 0 AGA > C:\Users\ayoub\projets\Projet\TicTacToeAI-AGA\run_arena.log 2>&1" /RU ayoub /IT /F
+schtasks /Create /TN UTTT_Run /SC ONCE /ST 23:59 /TR "cmd /c cd /d C:\Users\ayoub\projets\Projet\TicTacToeAI-AGA && ia_soutenance.exe arena med1 100 0 AGA > C:\Users\ayoub\projets\Projet\TicTacToeAI-AGA\run_med1_soutenance_100done.log 2>&1" /RU ayoub /IT /F
 schtasks /Run /TN UTTT_Run
 ```
 
-Puis lecture du log:
-- `C:\Users\ayoub\projets\Projet\TicTacToeAI-AGA\run_arena.log`
-
-## Remarques environnement
-
-Le template fourni est centre Windows/MinGW (`.dll`, `.exe`, `libUTTTLib.a` au format COFF).
-Sur macOS, le linking natif peut echouer sans toolchain compatible.
-
-## Ce qui va
-
-- la branche `ayoub` compile sur la VM Windows cible
-- l'IA joue bien (coups et evaluations visibles dans les logs)
-- base de code assez claire pour la soutenance
-
-## Resultats de tests (VM `win-dev`, 2026-04-30)
-
-Campagnes lancees en mode `arena` via tache interactive, puis parsing des logs.
-
-| Niveau | Parties detectees | Victoires (PLAYER) | Defaites (IA) | Egalites | Taux de victoire (hors egalites) | Validation 80% |
-|---|---:|---:|---:|---:|---:|---|
-| `MEDIUM_1` | 100 | 98 | 0 | 2 | 100.00% | OK |
-| `MEDIUM_2` | 100 | 15 | 83 | 2 | 15.31% | KO |
-
-Note: dans les logs, les egalites apparaissent comme `IA AND PLAYER`.
-
-## Ce qui ne va pas encore
-
-- execution SSH directe impossible (GUI Allegro requise)
-- mode Arena semble enchaîner beaucoup de parties meme avec `nbGames` faible
-- `MEDIUM_2` est loin de l'objectif de 80%
-
-## Reste a faire
-
-- extraire des stats claires depuis les logs (wins/loss/draw + pourcentage hors egalites)
-- verifier stabilite en mode `DEBUG` et `ARENA`
-- ameliorer l'IA pour monter le taux en `MEDIUM_2` (evaluation + gestion tactique)
-- ajouter un `.gitignore` pour `bin/`, `obj/`, executables et fichiers temporaires
+## Elements a dire en soutenance (sans ouvrir le code)
+- On est parti du template du prof (interface/moteur), puis on a implemente la logique UTTT complete.
+- La force principale vient d'un minimax alpha-beta propre + evaluation meta-grille.
+- On a volontairement garde une version simple et explicable.
+- Cette version valide largement MEDIUM_1 (100% hors egalites sur 100 parties).
