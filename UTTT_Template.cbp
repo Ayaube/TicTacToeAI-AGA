@@ -10,14 +10,10 @@
 				<Option output="bin/Debug/UTTT_Template" prefix_auto="1" extension_auto="1" />
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
-				<Option compiler="gcc-mingw32" />
+				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-g" />
-					<Add option="-fno-lto" />
 				</Compiler>
-				<Linker>
-					<Add option="-fno-lto" />
-				</Linker>
 			</Target>
 			<Target title="Release">
 				<Option output="bin/Release/UTTT_Template" prefix_auto="1" extension_auto="1" />
@@ -41,12 +37,12 @@
 			<Add option="allegro-5.2.dll" />
 			<Add library="./libUTTTLib.a" />
 		</Linker>
-		<Unit filename="Jeux.h" />
-		<Unit filename="Joueur.h" />
-		<Unit filename="Plateau.cpp" />
-		<Unit filename="Plateau.h" />
 		<Unit filename="main.cpp" />
 		<Unit filename="main.h" />
-		<Extensions />
+		<Extensions>
+			<code_completion />
+			<envvars />
+			<debugger />
+		</Extensions>
 	</Project>
 </CodeBlocks_project_file>
