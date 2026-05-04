@@ -1,4 +1,4 @@
-# UTTT - Notes d'equipe (version chill)
+# UTTT - Notes d'equipe 
 
 ## C'est quoi ce repo ?
 En gros c'est notre bot pour Ultimate Tic-Tac-Toe en C++.
