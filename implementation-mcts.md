@@ -230,6 +230,35 @@ Le minimax doit rester disponible comme fallback a tout moment.
   - hypothese: gagner/bloquer une sous-grille localement sans regarder la grille envoyee donne trop souvent de bons coups locaux mais de mauvais coups UTTT.
   - prochaine piste plus credible: hybride simple, par exemple utiliser minimax existant comme garde-fou racine ou comme selection parmi les coups les plus visites.
 
+### 2026-05-05 - Test MCTS-EH DeepSearch MEDIUM_2 reel
+
+- Changement teste localement mais non conserve:
+  - suppression des playouts aleatoires.
+  - evaluation directe du plateau etendu avec `evaluer()`.
+  - normalisation sigmoid avec temperature `8000.0`.
+- Idee DeepSearch:
+  - garder selection/expansion MCTS.
+  - remplacer la simulation par l'heuristique minimax existante.
+- Binaire VM:
+  - `ia_mcts_med2.exe`, build avec `-DACTIVER_MCTS -DNIVEAU_MEDIUM_2`
+- Niveau confirme:
+  - `Game: - Level : Medium 2`
+- Regle d'arret:
+  - kill switch DeepSearch: stopper si `loss >= 8` avant ou a 15 parties.
+- Logs:
+  - VM: `C:\Users\ayoub\projets\Projet\TicTacToeAI-AGA-mcts-bench\run_mcts_med2_eval_stop.log`
+  - local: `/Users/aubepine/Documents/Coding/Projet TicTacToe/test-logs/run_mcts_med2_eval_stop_kill.log`
+  - repo: `test-logs/run_mcts_med2_eval_stop_kill.log`
+- Resultat partiel:
+  - starts = 9
+  - wins = 0
+  - losses = 8
+  - draws = 0
+- Conclusion:
+  - regression immediate, kill switch declenche.
+  - MCTS-EH tel quel a ete retire du code.
+  - cause probable: l'evaluation statique utilisee seule transforme MCTS en exploration de coups a horizon tres court, sans assez de tactique adversaire.
+
 ## Implementation en cours
 
 - Ajout de `resultatPartie()`:
@@ -247,6 +276,7 @@ Le minimax doit rester disponible comme fallback a tout moment.
   - logs `sims`, `sims/s`, `temps_ms`.
 - Note importante:
   - le playout tactique naif a ete teste puis rollback car il regressait fortement MEDIUM_2 reel.
+  - MCTS-EH par evaluation directe `evaluer()` a ete teste puis rollback car il declenche le kill switch MEDIUM_2.
 
 ## Notes pour reprise
 
