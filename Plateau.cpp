@@ -39,9 +39,9 @@ int Plateau::getCase(int row, int col) {
 }
 
 void Plateau::setCase(int row, int col, int val) {
-    m_hash ^= m_zobrist[row][col][m_grille[row][col]+1]; // remove old
+    m_hash ^= m_zobrist[row][col][m_grille[row][col]+1];
     m_grille[row][col] = val;
-    m_hash ^= m_zobrist[row][col][val+1];                // apply new
+    m_hash ^= m_zobrist[row][col][val+1];
 }
 
 void Plateau::affiche_plateau(){
@@ -55,19 +55,12 @@ void Plateau::affiche_plateau(){
 
 int Plateau::gagnant(int dL, int dC) {
     for (int joueur : {1, -1}) {
-        // Diagonales
-        if (getCase(dL, dC) == joueur && getCase(dL+1, dC+1) == joueur && getCase(dL+2, dC+2) == joueur)
-            return joueur;
-        if (getCase(dL, dC+2) == joueur && getCase(dL+1, dC+1) == joueur && getCase(dL+2, dC) == joueur)
-            return joueur;
-        // Lignes
+        if (getCase(dL, dC) == joueur && getCase(dL+1, dC+1) == joueur && getCase(dL+2, dC+2) == joueur) return joueur;
+        if (getCase(dL, dC+2) == joueur && getCase(dL+1, dC+1) == joueur && getCase(dL+2, dC) == joueur) return joueur;
         for (int i = 0; i < 3; i++)
-            if (getCase(dL+i, dC) == joueur && getCase(dL+i, dC+1) == joueur && getCase(dL+i, dC+2) == joueur)
-                return joueur;
-        // Colonnes
+            if (getCase(dL+i, dC) == joueur && getCase(dL+i, dC+1) == joueur && getCase(dL+i, dC+2) == joueur) return joueur;
         for (int j = 0; j < 3; j++)
-            if (getCase(dL, dC+j) == joueur && getCase(dL+1, dC+j) == joueur && getCase(dL+2, dC+j) == joueur)
-                return joueur;
+            if (getCase(dL, dC+j) == joueur && getCase(dL+1, dC+j) == joueur && getCase(dL+2, dC+j) == joueur) return joueur;
     }
     return 0;
 }
@@ -103,7 +96,6 @@ int Plateau::prioriteCoup(int r, int c, int joueur) {
     int lr = r % 3, lc = c % 3;
     int br = r / 3, bc = c / 3;
 
-    // Position dans le sous-plateau : centre > coin > bord
     if (lr == 1 && lc == 1) score += 4;
     else if (lr != 1 && lc != 1) score += 2;
 
@@ -113,7 +105,6 @@ int Plateau::prioriteCoup(int r, int c, int joueur) {
         {{0,0},{1,1},{2,2}}, {{0,2},{1,1},{2,0}}
     };
 
-    // Dans le sous-plateau courant : ce coup gagne-t-il ? bloque-t-il ?
     for (auto& ligne : L) {
         bool passePar = false;
         for (auto& p : ligne) if (p[0]==lr && p[1]==lc) { passePar=true; break; }
@@ -121,36 +112,28 @@ int Plateau::prioriteCoup(int r, int c, int joueur) {
         int nos = 0, adv = 0;
         for (auto& p : ligne) {
             int v = getCase(br*3+p[0], bc*3+p[1]);
-            if (v == joueur)  nos++;
-            else if (v == -joueur) adv++;
+            if (v == joueur) nos++; else if (v == -joueur) adv++;
         }
-        if (nos == 2) { score += 20; break; } // victoire dans le sous-plateau
-        if (adv == 2) { score += 15; break; } // blocage indispensable
+        if (nos == 2) { score += 20; break; }
+        if (adv == 2) { score += 15; break; }
     }
 
-    // Sous-plateau cible (où l'adversaire sera envoyé)
     if (estCondamne(lr * 3, lc * 3)) {
-        score -= 6; // adversaire joue librement → mauvais
+        score -= 6;
     } else {
-        bool advThreat = false;
-        bool ourThreat = false;
+        bool advThreat = false, ourThreat = false;
         for (auto& ligne : L) {
             int nos = 0, adv = 0;
-            bool blocNos = false, blocAdv = false;
             for (auto& p : ligne) {
                 int v = getCase(lr*3+p[0], lc*3+p[1]);
-                if (v == joueur)   { nos++; }
-                else if (v == -joueur) { adv++; }
+                if (v == joueur) nos++; else if (v == -joueur) adv++;
             }
-            // Adversaire a 2-en-ligne dans la cible → il ira attaquer
             if (adv == 2 && nos == 0) advThreat = true;
-            // Nous avons 2-en-ligne dans la cible → il devra défendre notre menace
             if (nos == 2 && adv == 0) ourThreat = true;
         }
         if (advThreat) score -= 10;
-        if (ourThreat) score += 12; // on force l'adversaire à défendre
+        if (ourThreat) score += 12;
 
-        // Bonus méta : la cible est dans une ligne méta où on a déjà un sous-plateau gagné
         static const int ML[8][3][2] = {
             {{0,0},{0,1},{0,2}}, {{1,0},{1,1},{1,2}}, {{2,0},{2,1},{2,2}},
             {{0,0},{1,0},{2,0}}, {{0,1},{1,1},{2,1}}, {{0,2},{1,2},{2,2}},
@@ -165,14 +148,11 @@ int Plateau::prioriteCoup(int r, int c, int joueur) {
                 if (m_etat[p[0]][p[1]] == -joueur) euxGagnes++;
             }
             if (!dansLigne) continue;
-            // Envoyer dans une ligne méta qui nous est favorable
             if (nosGagnes > 0 && euxGagnes == 0) score += 7 * nosGagnes;
-            // Envoyer dans une ligne méta qui leur est favorable → dangereux
             if (euxGagnes > 0 && nosGagnes == 0) score -= 7 * euxGagnes;
         }
     }
 
-    // Méta-conscience : ce coup gagne-t-il le sous-plateau → impact méta ?
     {
         bool gagneSubBoard = false;
         for (auto& ligne : L) {
@@ -188,14 +168,12 @@ int Plateau::prioriteCoup(int r, int c, int joueur) {
             if (nos == 2) { gagneSubBoard = true; break; }
         }
         if (gagneSubBoard && m_etat[br][bc] == 0) {
-            // Simuler la victoire du sous-plateau et évaluer l'impact méta
             static const int ML[8][3][2] = {
                 {{0,0},{0,1},{0,2}}, {{1,0},{1,1},{1,2}}, {{2,0},{2,1},{2,2}},
                 {{0,0},{1,0},{2,0}}, {{0,1},{1,1},{2,1}}, {{0,2},{1,2},{2,2}},
                 {{0,0},{1,1},{2,2}}, {{0,2},{1,1},{2,0}}
             };
             m_etat[br][bc] = joueur;
-            // Vérifie si ça gagne le jeu entier
             bool gagneMeta = false;
             for (auto& ml : ML) {
                 int v0=m_etat[ml[0][0]][ml[0][1]], v1=m_etat[ml[1][0]][ml[1][1]], v2=m_etat[ml[2][0]][ml[2][1]];
@@ -204,7 +182,6 @@ int Plateau::prioriteCoup(int r, int c, int joueur) {
             if (gagneMeta) {
                 score += 500;
             } else {
-                // Compte les menaces méta créées
                 int menaces = 0;
                 for (auto& ml : ML) {
                     int nous=0, eux=0, ouverts=0;
@@ -251,10 +228,7 @@ int Plateau::evaluerSousPlateau(int startR, int startC) {
         {{0,0},{1,0},{2,0}}, {{0,1},{1,1},{2,1}}, {{0,2},{1,2},{2,2}},
         {{0,0},{1,1},{2,2}}, {{0,2},{1,1},{2,0}}
     };
-
-    // Centre du sous-plateau vaut plus
     score += getCase(startR + 1, startC + 1) * 3;
-
     for (auto& ligne : lignes) {
         int nous = 0, eux = 0;
         for (auto& pos : ligne) {
@@ -262,14 +236,8 @@ int Plateau::evaluerSousPlateau(int startR, int startC) {
             if (val == 1) nous++;
             else if (val == -1) eux++;
         }
-        if (eux == 0) {
-            if (nous == 2) score += 10;
-            else if (nous == 1) score += 2;
-        }
-        if (nous == 0) {
-            if (eux == 2) score -= 10;
-            else if (eux == 1) score -= 2;
-        }
+        if (eux == 0) { if (nous == 2) score += 10; else if (nous == 1) score += 2; }
+        if (nous == 0) { if (eux == 2) score -= 10; else if (eux == 1) score -= 2; }
     }
     return score;
 }
@@ -372,7 +340,6 @@ int Plateau::quiesce(int alpha, int beta, bool estMax, int cibleL, int cibleC, i
         int lr=r%3, lc=c%3, br=r/3, bc=c/3;
         if (m_etat[br][bc] != 0) continue;
 
-        // Vérifie si ce coup complète une ligne dans le sous-plateau
         bool wins = false;
         for (auto& ligne : L) {
             bool passePar = false;
@@ -565,8 +532,12 @@ void Plateau::prochainMove(GameMove &myMove, GameMove &lastMove) {
     int n = (int)coups.size();
     if (n == 1) { myMove = {coups[0].first, coups[0].second}; return; }
 
-    // Contraint (sous-plateau ciblé) → profondeur 6, coup libre → 5
-    int maxDepth = (cibleL == -1) ? 5 : 6;
+    // Profondeur adaptative selon le nombre de coups disponibles
+    int maxDepth;
+    if (cibleL == -1)  maxDepth = 5;   // choix libre, branching potentiellement élevé
+    else if (n <= 3)   maxDepth = 8;   // sous-plateau presque plein, arbre très étroit
+    else if (n <= 5)   maxDepth = 7;   // sous-plateau peu peuplé, encore étroit
+    else               maxDepth = 6;   // sous-plateau majoritairement vide
     myMove = {coups[0].first, coups[0].second};
 
     // Iterative deepening avec réordonnancement complet par score entre itérations

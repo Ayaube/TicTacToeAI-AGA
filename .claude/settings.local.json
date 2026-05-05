@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(g++ -O2 -std=c++17 -c main.cpp -o /dev/null)",
-      "Bash(g++ -O2 -std=c++17 -c Plateau.cpp -o /dev/null)"
+      "Bash(g++ -O2 -std=c++17 -c Plateau.cpp -o /dev/null)",
+      "Bash(g++ -std=c++17 -O2 -Wall -Wextra -c Plateau.cpp -o Plateau.o)",
+      "Bash(g++ -std=c++17 -O2 -c Plateau.cpp -o Plateau.o)"
     ]
   }
 }

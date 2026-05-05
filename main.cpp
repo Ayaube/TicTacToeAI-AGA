@@ -8,7 +8,7 @@ using namespace std;
 int main()
 {
     // Game initialization
-    game.initialize(10, Level::MEDIUM_1, Mode::ARENA, false, "AGA");
+    game.initialize(10, Level::MEDIUM_2, Mode::ARENA, false, "AGA");
 
     int size = 9;
     vector<vector<int>> plateau(size, vector<int>(size, 0));
