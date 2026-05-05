@@ -179,6 +179,31 @@ Le minimax doit rester disponible comme fallback a tout moment.
   - Le probleme n'est pas seulement le nombre de simulations: les playouts aleatoires se font punir tactiquement.
   - Prochaine etape: ajouter un playout tactique leger (gagner une sous-grille si possible, bloquer une menace immediate, sinon aleatoire), puis retester MEDIUM_2 reel et HARD_1.
 
+### 2026-05-05 - Campagne MCTS MEDIUM_2 reel, arret a 20 defaites
+
+- Binaire VM:
+  - `ia_mcts_med2.exe`, build avec `-DACTIVER_MCTS -DNIVEAU_MEDIUM_2`
+- Niveau confirme par le log:
+  - `Game: - Level : Medium 2`
+- Commande:
+  - `ia_mcts_med2.exe`
+- Regle d'arret demandee:
+  - stopper des que `loss >= 20`
+- Logs:
+  - VM: `C:\Users\ayoub\projets\Projet\TicTacToeAI-AGA-mcts-bench\run_mcts_med2_reel.log`
+  - local: `/Users/aubepine/Documents/Coding/Projet TicTacToe/test-logs/run_mcts_med2_reel_stop20loss.log`
+  - repo: `test-logs/run_mcts_med2_reel_stop20loss.log`
+- Resultat partiel au stop:
+  - starts = 28
+  - wins = 4
+  - losses = 20
+  - draws = 3
+  - pas de `Finish`, car arret manuel a 20 defaites.
+- Conclusion:
+  - MCTS minimal pur ne valide pas MEDIUM_2 reel.
+  - Le faux resultat precedent venait bien du niveau compile en `MEDIUM_1`.
+  - Prochaine etape prioritaire: ajouter un playout tactique leger avant de refaire MEDIUM_2.
+
 ## Implementation en cours
 
 - Ajout de `resultatPartie()`:
