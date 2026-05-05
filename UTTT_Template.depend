@@ -13,7 +13,7 @@
 1776866528 c:\users\antoi\documents\tictactoeai-aga\main.h
 	<string>
 
-1777128861 source:c:\users\user\documents\esilv\poo\tictactoeai-aga\main.cpp
+1777964240 source:c:\users\user\documents\esilv\poo\tictactoeai-aga\main.cpp
 	<iostream>
 	<vector>
 	"main.h"
@@ -22,14 +22,18 @@
 1776865139 c:\users\user\documents\esilv\poo\tictactoeai-aga\main.h
 	<string>
 
-1777533492 source:c:\users\user\documents\esilv\poo\tictactoeai-aga\plateau.cpp
+1777964197 source:c:\users\user\documents\esilv\poo\tictactoeai-aga\plateau.cpp
 	<iostream>
+	<array>
 	<vector>
+	<limits>
+	<algorithm>
+	<chrono>
 	"Plateau.h"
 	"main.h"
 
-1777533339 c:\users\user\documents\esilv\poo\tictactoeai-aga\plateau.h
-	<iostream>
+1777964884 c:\users\user\documents\esilv\poo\tictactoeai-aga\plateau.h
+	<array>
 	<vector>
 	"main.h"
 

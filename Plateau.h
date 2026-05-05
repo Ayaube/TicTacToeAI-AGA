@@ -11,6 +11,23 @@ static const int PROFONDEUR_MAX = 9;
 static const int MAX_MOVES      = 81; // au maximum 81 coups possibles
 
 class Plateau {
+
+private:
+    std::array<std::array<int,9>,9> m_g; // grille 9x9
+    std::array<std::array<int,3>,3> m_e; // etat meta 3x3
+
+    int  jouerCoup(int row, int col, int joueur);
+    void annulerCoup(int row, int col, int ancienEtat);
+    int  etatSousPlateau(int si, int sj);
+
+    // Version sans allocation : ecrit dans un buffer fourni
+    int getCoupsLegauxFast(const GameMove& last, GameMove buf[MAX_MOVES]);
+
+    int minimax(GameMove last, int depth, int alpha, int beta, int joueur);
+
+    int evaluer();
+    int urgenceMetaGrille(int joueur);
+
 public:
     Plateau();
     ~Plateau();
@@ -29,23 +46,6 @@ public:
     // Interface publique (utilisee par main.cpp)
     std::vector<GameMove> getCoupsLegaux(const GameMove& last);
     void prochainMove(GameMove& myMove, GameMove& lastMove);
-
-private:
-    // Donnees : tableaux plats, pas de vector -> zero allocation dans minimax
-    std::array<std::array<int,9>,9> m_g; // grille 9x9
-    std::array<std::array<int,3>,3> m_e; // etat meta 3x3
-
-    int  jouerCoup(int row, int col, int joueur);
-    void annulerCoup(int row, int col, int ancienEtat);
-    int  etatSousPlateau(int si, int sj);
-
-    // Version sans allocation : ecrit dans un buffer fourni
-    int getCoupsLegauxFast(const GameMove& last, GameMove buf[MAX_MOVES]);
-
-    int minimax(GameMove last, int depth, int alpha, int beta, int joueur);
-
-    int evaluer();
-    int urgenceMetaGrille(int joueur);
 };
 
 #endif // PLATEAU_H
