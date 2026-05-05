@@ -204,6 +204,32 @@ Le minimax doit rester disponible comme fallback a tout moment.
   - Le faux resultat precedent venait bien du niveau compile en `MEDIUM_1`.
   - Prochaine etape prioritaire: ajouter un playout tactique leger avant de refaire MEDIUM_2.
 
+### 2026-05-05 - Test playout tactique naif MEDIUM_2 reel
+
+- Changement teste localement mais non conserve:
+  - garde-fou avant MCTS: si coup gagnant ou blocage immediat, le jouer directement.
+  - playout MCTS: gagner une sous-grille si possible, sinon bloquer une victoire locale adverse, sinon aleatoire.
+- Binaire VM:
+  - `ia_mcts_med2.exe`, build avec `-DACTIVER_MCTS -DNIVEAU_MEDIUM_2`
+- Niveau confirme:
+  - `Game: - Level : Medium 2`
+- Regle d'arret:
+  - stopper des que `loss >= 20`
+- Logs:
+  - VM: `C:\Users\ayoub\projets\Projet\TicTacToeAI-AGA-mcts-bench\run_mcts_med2_tactique_stop20loss.log`
+  - local: `/Users/aubepine/Documents/Coding/Projet TicTacToe/test-logs/run_mcts_med2_tactique_stop20loss.log`
+  - repo: `test-logs/run_mcts_med2_tactique_stop20loss.log`
+- Resultat partiel:
+  - starts = 22
+  - wins = 0
+  - losses = 21
+  - draws = 0
+- Conclusion:
+  - regression nette vs MCTS minimal (qui faisait 4 wins / 20 losses / 3 draws au stop).
+  - le playout tactique naif a ete retire du code.
+  - hypothese: gagner/bloquer une sous-grille localement sans regarder la grille envoyee donne trop souvent de bons coups locaux mais de mauvais coups UTTT.
+  - prochaine piste plus credible: hybride simple, par exemple utiliser minimax existant comme garde-fou racine ou comme selection parmi les coups les plus visites.
+
 ## Implementation en cours
 
 - Ajout de `resultatPartie()`:
@@ -219,6 +245,8 @@ Le minimax doit rester disponible comme fallback a tout moment.
   - UCB1,
   - choix final par enfant le plus visite,
   - logs `sims`, `sims/s`, `temps_ms`.
+- Note importante:
+  - le playout tactique naif a ete teste puis rollback car il regressait fortement MEDIUM_2 reel.
 
 ## Notes pour reprise
 
@@ -226,4 +254,4 @@ Le minimax doit rester disponible comme fallback a tout moment.
 - Eviter les bitboards au debut.
 - Garder les commentaires courts et pedagogiques.
 - Les logs doivent aider a expliquer, pas noyer la sortie.
-- Prochaine vraie etape: lancer une campagne VM courte minimax sans `-DACTIVER_MCTS`, puis MCTS avec `-DACTIVER_MCTS`.
+- Prochaine vraie etape: tester un hybride simple MCTS/minimax, pas relancer le playout tactique naif tel quel.

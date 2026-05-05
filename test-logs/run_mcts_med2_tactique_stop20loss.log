@@ -1,0 +1,1483 @@
+Game: ----------- Game engine initialization... -----------
+Game: - Time elapsed    : 0 ms
+Game: - Number of games : 100 
+Game: - Mode            : Arena 
+Game: - Level           : Medium 2 
+Game: - Player          : AGA 
+Game: - Random          : YES 
+Game: - Random seed     : 1777962388860725300 
+Game: ----------- Game engine initialized       -----------
+Game: ----------- Start game #1 -----------
+Game: AGA plays with X
+Game: IA plays with O
+IA move -1 -1
+[MCTS] sims=8074 sims/s=23068 temps_ms=350
+Send move 8 8
+IA move 6 6
+[MCTS] sims=9117 sims/s=26048 temps_ms=350
+Send move 1 1
+IA move 4 4
+[MCTS] sims=9105 sims/s=26014 temps_ms=350
+Send move 3 3
+IA move 2 0
+[MCTS] sims=9011 sims/s=25745 temps_ms=350
+Send move 8 0
+IA move 6 2
+[MCTS] sims=10673 sims/s=30494 temps_ms=350
+Send move 1 8
+IA move 4 6
+[MCTS] sims=11133 sims/s=31808 temps_ms=350
+Send move 5 1
+IA move 6 4
+[MCTS] sims=11832 sims/s=33805 temps_ms=350
+Send move 1 5
+IA move 4 8
+[MCTS] tactique directe
+Send move 4 7
+IA move 4 3
+[MCTS] sims=12991 sims/s=37117 temps_ms=350
+Send move 4 0
+IA move 3 1
+[MCTS] sims=12743 sims/s=36408 temps_ms=350
+Send move 1 3
+IA move 3 2
+[MCTS] sims=16220 sims/s=46342 temps_ms=350
+Send move 1 6
+IA move 3 0
+IA gagne sous-plateau (1,0)
+[MCTS] sims=17241 sims/s=49260 temps_ms=350
+Send move 2 1
+IA move 8 4
+[MCTS] tactique directe
+Send move 7 4
+IA move 4 5
+IA gagne sous-plateau (1,1)
+[MCTS] sims=19726 sims/s=56360 temps_ms=350
+Send move 5 6
+IA move 8 1
+[MCTS] sims=20678 sims/s=59080 temps_ms=350
+Send move 8 3
+IA move 6 1
+[MCTS] tactique directe
+Send move 1 4
+Joueur gagne sous-plateau (0,1)
+IA move 5 8
+[MCTS] sims=30054 sims/s=85868 temps_ms=350
+Send move 8 7
+IA move 6 3
+[MCTS] tactique directe
+Send move 0 1
+Joueur gagne sous-plateau (0,0)
+Game: Winner O (IA) 
+
+Game: ----------- Start game #2 -----------
+Game: IA plays with X
+Game: AGA plays with O
+IA move 5 5
+[MCTS] sims=8680 sims/s=24800 temps_ms=350
+Send move 8 7
+IA move 6 3
+[MCTS] sims=8928 sims/s=25508 temps_ms=350
+Send move 0 2
+IA move 1 7
+[MCTS] sims=8761 sims/s=25031 temps_ms=350
+Send move 4 5
+IA move 5 8
+[MCTS] sims=8898 sims/s=25422 temps_ms=350
+Send move 8 8
+IA move 8 6
+[MCTS] sims=9773 sims/s=27922 temps_ms=350
+Send move 6 0
+IA move 1 2
+[MCTS] sims=11169 sims/s=31911 temps_ms=350
+Send move 3 7
+IA move 0 4
+[MCTS] sims=11569 sims/s=33054 temps_ms=350
+Send move 2 4
+IA move 7 3
+[MCTS] sims=12335 sims/s=35242 temps_ms=350
+Send move 5 1
+IA move 8 3
+IA gagne sous-plateau (2,1)
+[MCTS] sims=12345 sims/s=35271 temps_ms=350
+Send move 8 0
+IA move 7 0
+[MCTS] sims=14155 sims/s=40442 temps_ms=350
+Send move 3 1
+IA move 0 5
+[MCTS] sims=16104 sims/s=46011 temps_ms=350
+Send move 1 6
+IA move 4 0
+[MCTS] tactique directe
+Send move 4 1
+Joueur gagne sous-plateau (1,0)
+IA move 3 3
+[MCTS] sims=19255 sims/s=55014 temps_ms=350
+Send move 0 0
+IA move 0 1
+[MCTS] tactique directe
+Send move 0 3
+IA move 1 1
+[MCTS] tactique directe
+Send move 4 4
+IA move 5 3
+[MCTS] sims=20733 sims/s=59237 temps_ms=350
+Send move 8 2
+IA move 6 8
+[MCTS] sims=24340 sims/s=69542 temps_ms=350
+Send move 2 6
+IA move 7 2
+[MCTS] sims=27679 sims/s=79082 temps_ms=350
+Send move 3 8
+IA move 0 7
+[MCTS] sims=29328 sims/s=83794 temps_ms=350
+Send move 1 5
+IA move 3 6
+[MCTS] tactique directe
+Send move 1 0
+IA move 7 1
+IA gagne sous-plateau (2,0)
+[MCTS] tactique directe
+Send move 4 3
+Joueur gagne sous-plateau (1,1)
+Game: Winner X (IA) 
+
+Game: ----------- Start game #3 -----------
+Game: AGA plays with X
+Game: IA plays with O
+IA move -1 -1
+[MCTS] sims=7542 sims/s=21548 temps_ms=350
+Send move 3 5
+IA move 2 7
+[MCTS] sims=9254 sims/s=26440 temps_ms=350
+Send move 7 3
+IA move 4 2
+[MCTS] sims=8802 sims/s=25148 temps_ms=350
+Send move 5 6
+IA move 6 2
+[MCTS] sims=9887 sims/s=28248 temps_ms=350
+Send move 0 7
+IA move 1 5
+[MCTS] sims=10248 sims/s=29280 temps_ms=350
+Send move 5 7
+IA move 6 4
+[MCTS] sims=11047 sims/s=31562 temps_ms=350
+Send move 0 4
+IA move 2 4
+[MCTS] sims=11341 sims/s=32402 temps_ms=350
+Send move 6 3
+IA move 0 0
+[MCTS] sims=11866 sims/s=33902 temps_ms=350
+Send move 2 2
+IA move 6 8
+[MCTS] sims=12550 sims/s=35857 temps_ms=350
+Send move 0 8
+IA move 2 6
+[MCTS] sims=13712 sims/s=39177 temps_ms=350
+Send move 6 1
+IA move 1 3
+[MCTS] sims=14898 sims/s=42565 temps_ms=350
+Send move 5 1
+IA move 8 3
+[MCTS] sims=15327 sims/s=43791 temps_ms=350
+Send move 7 2
+IA move 5 8
+[MCTS] sims=15145 sims/s=43271 temps_ms=350
+Send move 6 7
+IA move 1 4
+IA gagne sous-plateau (0,1)
+[MCTS] sims=14400 sims/s=41142 temps_ms=350
+Send move 3 3
+IA move 1 0
+[MCTS] sims=18934 sims/s=54097 temps_ms=350
+Send move 4 0
+IA move 5 2
+[MCTS] sims=20775 sims/s=59357 temps_ms=350
+Send move 7 6
+IA move 4 1
+[MCTS] tactique directe
+Send move 3 4
+Joueur gagne sous-plateau (1,1)
+IA move 2 8
+IA gagne sous-plateau (0,2)
+[MCTS] sims=30618 sims/s=87480 temps_ms=350
+Send move 8 7
+IA move 8 4
+[MCTS] tactique directe
+Send move 7 4
+Game: Winner O (IA) 
+
+Game: ----------- Start game #4 -----------
+Game: IA plays with X
+Game: AGA plays with O
+IA move 5 5
+[MCTS] sims=8635 sims/s=24671 temps_ms=350
+Send move 8 6
+IA move 8 0
+[MCTS] sims=9145 sims/s=26128 temps_ms=350
+Send move 6 0
+IA move 1 1
+[MCTS] sims=9899 sims/s=28282 temps_ms=350
+Send move 4 4
+IA move 3 5
+[MCTS] sims=10284 sims/s=29382 temps_ms=350
+Send move 2 6
+IA move 6 2
+[MCTS] sims=10697 sims/s=30562 temps_ms=350
+Send move 0 8
+IA move 2 7
+[MCTS] sims=10354 sims/s=29582 temps_ms=350
+Send move 6 5
+IA move 0 7
+[MCTS] sims=11758 sims/s=33594 temps_ms=350
+Send move 0 4
+IA move 1 3
+[MCTS] sims=12192 sims/s=34834 temps_ms=350
+Send move 5 0
+IA move 8 2
+[MCTS] sims=13638 sims/s=38965 temps_ms=350
+Send move 6 6
+IA move 1 0
+[MCTS] sims=14261 sims/s=40745 temps_ms=350
+Send move 5 1
+IA move 8 5
+[MCTS] tactique directe
+Send move 7 6
+Joueur gagne sous-plateau (2,2)
+IA move 3 0
+[MCTS] tactique directe
+Send move 1 2
+IA move 5 7
+[MCTS] sims=17751 sims/s=50717 temps_ms=350
+Send move 6 4
+IA move 0 3
+[MCTS] sims=21371 sims/s=61060 temps_ms=350
+Send move 2 0
+IA move 8 1
+IA gagne sous-plateau (2,0)
+[MCTS] tactique directe
+Send move 6 3
+Joueur gagne sous-plateau (2,1)
+IA move 0 1
+[MCTS] tactique directe
+Send move 2 3
+IA move 4 5
+IA gagne sous-plateau (1,1)
+[MCTS] sims=28193 sims/s=80551 temps_ms=350
+Send move 3 7
+IA move 1 5
+[MCTS] sims=33280 sims/s=95085 temps_ms=350
+Send move 4 8
+IA move 3 6
+[MCTS] tactique directe
+Send move 2 1
+Game: Winner X (IA) 
+
+Game: ----------- Start game #5 -----------
+Game: AGA plays with X
+Game: IA plays with O
+IA move -1 -1
+[MCTS] sims=7785 sims/s=22242 temps_ms=350
+Send move 3 6
+IA move 2 1
+[MCTS] sims=8851 sims/s=25288 temps_ms=350
+Send move 7 5
+IA move 5 6
+[MCTS] sims=9070 sims/s=25914 temps_ms=350
+Send move 8 1
+IA move 6 5
+[MCTS] sims=9164 sims/s=26182 temps_ms=350
+Send move 2 6
+IA move 6 1
+[MCTS] sims=9628 sims/s=27508 temps_ms=350
+Send move 1 3
+IA move 4 0
+[MCTS] sims=10720 sims/s=30628 temps_ms=350
+Send move 3 1
+IA move 0 4
+[MCTS] sims=10082 sims/s=28805 temps_ms=350
+Send move 0 3
+IA move 1 1
+[MCTS] sims=10922 sims/s=31205 temps_ms=350
+Send move 4 4
+IA move 5 5
+[MCTS] sims=12325 sims/s=35214 temps_ms=350
+Send move 6 8
+IA move 2 8
+[MCTS] sims=11766 sims/s=33617 temps_ms=350
+Send move 8 8
+IA move 7 8
+[MCTS] sims=14015 sims/s=40042 temps_ms=350
+Send move 3 7
+IA move 2 4
+[MCTS] sims=14524 sims/s=41497 temps_ms=350
+Send move 7 4
+IA move 5 3
+[MCTS] sims=16723 sims/s=47780 temps_ms=350
+Send move 6 0
+IA move 1 0
+[MCTS] sims=18504 sims/s=52868 temps_ms=350
+Send move 3 0
+IA move 0 0
+[MCTS] tactique directe
+Send move 0 1
+IA move 1 4
+IA gagne sous-plateau (0,1)
+[MCTS] tactique directe
+Send move 5 4
+IA move 6 3
+[MCTS] tactique directe
+Send move 1 2
+IA move 5 8
+[MCTS] sims=22492 sims/s=64262 temps_ms=350
+Send move 7 6
+IA move 5 2
+[MCTS] sims=22510 sims/s=64314 temps_ms=350
+Send move 7 7
+IA move 4 3
+[MCTS] tactique directe
+Send move 3 2
+Joueur gagne sous-plateau (1,0)
+IA move 0 8
+[MCTS] tactique directe
+Send move 1 8
+IA move 3 8
+[MCTS] sims=26489 sims/s=75682 temps_ms=350
+Send move 1 7
+IA move 3 5
+[MCTS] tactique directe
+Send move 1 6
+Joueur gagne sous-plateau (0,2)
+IA move 4 5
+IA gagne sous-plateau (1,1)
+[MCTS] tactique directe
+Send move 4 7
+Game: Winner O (IA) 
+
+Game: ----------- Start game #6 -----------
+Game: IA plays with X
+Game: AGA plays with O
+IA move 4 4
+[MCTS] sims=9144 sims/s=26125 temps_ms=350
+Send move 3 5
+IA move 2 8
+[MCTS] sims=8504 sims/s=24297 temps_ms=350
+Send move 8 6
+IA move 6 0
+[MCTS] sims=9920 sims/s=28342 temps_ms=350
+Send move 1 0
+IA move 4 2
+[MCTS] sims=10333 sims/s=29522 temps_ms=350
+Send move 5 8
+IA move 6 6
+[MCTS] sims=9713 sims/s=27751 temps_ms=350
+Send move 0 0
+IA move 2 0
+[MCTS] sims=10076 sims/s=28788 temps_ms=350
+Send move 7 2
+IA move 3 7
+[MCTS] sims=11015 sims/s=31471 temps_ms=350
+Send move 0 4
+IA move 1 3
+[MCTS] sims=12819 sims/s=36625 temps_ms=350
+Send move 5 1
+IA move 6 4
+[MCTS] sims=13656 sims/s=39017 temps_ms=350
+Send move 0 5
+IA move 1 8
+[MCTS] sims=13329 sims/s=38082 temps_ms=350
+Send move 5 7
+IA move 8 4
+[MCTS] tactique directe
+Send move 7 4
+IA move 4 5
+[MCTS] tactique directe
+Send move 5 6
+Joueur gagne sous-plateau (1,2)
+IA move 8 2
+[MCTS] sims=18652 sims/s=53291 temps_ms=350
+Send move 8 8
+IA move 8 7
+[MCTS] sims=19953 sims/s=57008 temps_ms=350
+Send move 7 5
+IA move 4 3
+IA gagne sous-plateau (1,1)
+[MCTS] sims=22522 sims/s=64348 temps_ms=350
+Send move 3 1
+IA move 0 3
+[MCTS] sims=26451 sims/s=75574 temps_ms=350
+Send move 0 2
+IA move 0 8
+IA gagne sous-plateau (0,2)
+[MCTS] tactique directe
+Send move 0 1
+Joueur gagne sous-plateau (0,0)
+IA move 2 4
+[MCTS] tactique directe
+Send move 7 3
+Joueur gagne sous-plateau (2,1)
+IA move 4 0
+[MCTS] tactique directe
+Send move 4 1
+Joueur gagne sous-plateau (1,0)
+Game: Winner X (IA) 
+
+Game: ----------- Start game #7 -----------
+Game: AGA plays with X
+Game: IA plays with O
+IA move -1 -1
+[MCTS] sims=8352 sims/s=23862 temps_ms=350
+Send move 7 6
+IA move 3 0
+[MCTS] sims=8588 sims/s=24537 temps_ms=350
+Send move 1 1
+IA move 4 4
+[MCTS] sims=9926 sims/s=28360 temps_ms=350
+Send move 3 5
+IA move 0 8
+[MCTS] sims=9440 sims/s=26971 temps_ms=350
+Send move 2 8
+IA move 6 7
+[MCTS] sims=10911 sims/s=31174 temps_ms=350
+Send move 0 3
+IA move 1 2
+[MCTS] sims=10743 sims/s=30694 temps_ms=350
+Send move 5 7
+IA move 8 3
+[MCTS] sims=11244 sims/s=32125 temps_ms=350
+Send move 8 0
+IA move 8 2
+[MCTS] sims=12405 sims/s=35442 temps_ms=350
+Send move 7 7
+IA move 4 5
+[MCTS] sims=13125 sims/s=37500 temps_ms=350
+Send move 5 6
+IA move 7 2
+[MCTS] tactique directe
+Send move 5 8
+Joueur gagne sous-plateau (1,2)
+IA move 6 6
+[MCTS] sims=17569 sims/s=50197 temps_ms=350
+Send move 0 0
+IA move 1 0
+[MCTS] sims=18579 sims/s=53082 temps_ms=350
+Send move 4 0
+IA move 5 1
+[MCTS] sims=17388 sims/s=49680 temps_ms=350
+Send move 7 3
+IA move 3 1
+[MCTS] sims=21392 sims/s=61120 temps_ms=350
+Send move 1 4
+IA move 4 3
+IA gagne sous-plateau (1,1)
+[MCTS] tactique directe
+Send move 3 2
+IA move 1 6
+[MCTS] tactique directe
+Send move 4 1
+IA move 6 8
+IA gagne sous-plateau (2,2)
+[MCTS] sims=26636 sims/s=76102 temps_ms=350
+Send move 0 7
+IA move 1 3
+[MCTS] tactique directe
+Send move 4 2
+Joueur gagne sous-plateau (1,0)
+IA move 6 2
+IA gagne sous-plateau (2,0)
+[MCTS] sims=29149 sims/s=83282 temps_ms=350
+Send move 2 6
+IA move 8 5
+[MCTS] tactique directe
+Send move 2 2
+Joueur gagne sous-plateau (0,0)
+Game: Winner O (IA) 
+
+Game: ----------- Start game #8 -----------
+Game: IA plays with X
+Game: AGA plays with O
+IA move 3 3
+[MCTS] sims=9310 sims/s=26600 temps_ms=350
+Send move 1 1
+IA move 5 5
+[MCTS] sims=9418 sims/s=26908 temps_ms=350
+Send move 8 8
+IA move 6 6
+[MCTS] sims=9638 sims/s=27537 temps_ms=350
+Send move 0 0
+IA move 2 2
+[MCTS] sims=10045 sims/s=28700 temps_ms=350
+Send move 8 6
+IA move 8 1
+[MCTS] sims=10452 sims/s=29862 temps_ms=350
+Send move 7 5
+IA move 5 7
+[MCTS] sims=10781 sims/s=30802 temps_ms=350
+Send move 8 4
+IA move 7 3
+[MCTS] sims=10390 sims/s=29685 temps_ms=350
+Send move 3 1
+IA move 1 5
+[MCTS] sims=11946 sims/s=34131 temps_ms=350
+Send move 3 6
+IA move 1 2
+[MCTS] sims=12160 sims/s=34742 temps_ms=350
+Send move 4 6
+IA move 4 0
+[MCTS] sims=13461 sims/s=38460 temps_ms=350
+Send move 3 0
+IA move 0 2
+IA gagne sous-plateau (0,0)
+[MCTS] sims=15288 sims/s=43680 temps_ms=350
+Send move 2 6
+IA move 8 0
+[MCTS] tactique directe
+Send move 8 2
+IA move 6 7
+[MCTS] sims=19257 sims/s=55020 temps_ms=350
+Send move 0 4
+IA move 1 3
+[MCTS] tactique directe
+Send move 3 2
+Joueur gagne sous-plateau (1,0)
+IA move 0 7
+[MCTS] tactique directe
+Send move 1 4
+IA move 3 5
+[MCTS] sims=25771 sims/s=73631 temps_ms=350
+Send move 1 8
+IA move 5 6
+[MCTS] sims=25114 sims/s=71754 temps_ms=350
+Send move 7 2
+IA move 4 8
+[MCTS] tactique directe
+Send move 5 8
+IA move 6 8
+IA gagne sous-plateau (2,2)
+[MCTS] sims=32120 sims/s=91771 temps_ms=350
+Send move 0 8
+IA move 2 7
+[MCTS] sims=30732 sims/s=87805 temps_ms=350
+Send move 8 3
+IA move 6 2
+[MCTS] tactique directe
+Send move 1 7
+Joueur gagne sous-plateau (0,2)
+Game: Winner X (IA) 
+
+Game: ----------- Start game #9 -----------
+Game: AGA plays with X
+Game: IA plays with O
+IA move -1 -1
+[MCTS] sims=8103 sims/s=23151 temps_ms=350
+Send move 1 7
+IA move 4 4
+[MCTS] sims=9250 sims/s=26428 temps_ms=350
+Send move 5 5
+IA move 6 6
+[MCTS] sims=9857 sims/s=28162 temps_ms=350
+Send move 2 2
+IA move 6 7
+[MCTS] sims=10615 sims/s=30328 temps_ms=350
+Send move 1 3
+IA move 4 2
+[MCTS] sims=10856 sims/s=31017 temps_ms=350
+Send move 4 8
+IA move 5 7
+[MCTS] sims=10659 sims/s=30454 temps_ms=350
+Send move 8 5
+IA move 6 8
+IA gagne sous-plateau (2,2)
+[MCTS] sims=11557 sims/s=33020 temps_ms=350
+Send move 1 6
+IA move 4 0
+[MCTS] tactique directe
+Send move 4 1
+IA move 4 5
+[MCTS] sims=11118 sims/s=31765 temps_ms=350
+Send move 5 8
+IA move 4 3
+IA gagne sous-plateau (1,1)
+[MCTS] sims=12079 sims/s=34511 temps_ms=350
+Send move 5 0
+IA move 7 2
+[MCTS] tactique directe
+Send move 3 8
+Joueur gagne sous-plateau (1,2)
+IA move 2 7
+[MCTS] sims=13440 sims/s=38400 temps_ms=350
+Send move 7 3
+IA move 3 2
+[MCTS] tactique directe
+Send move 1 8
+Joueur gagne sous-plateau (0,2)
+IA move 2 0
+[MCTS] sims=17255 sims/s=49300 temps_ms=350
+Send move 8 0
+IA move 7 0
+[MCTS] tactique directe
+Send move 5 2
+IA move 1 0
+[MCTS] tactique directe
+Send move 3 0
+Joueur gagne sous-plateau (1,0)
+Game: Winner O (IA) 
+
+Game: ----------- Start game #10 -----------
+Game: IA plays with X
+Game: AGA plays with O
+IA move 5 3
+[MCTS] sims=9175 sims/s=26214 temps_ms=350
+Send move 7 0
+IA move 5 2
+[MCTS] sims=9483 sims/s=27094 temps_ms=350
+Send move 6 6
+IA move 2 2
+[MCTS] sims=9498 sims/s=27137 temps_ms=350
+Send move 6 8
+IA move 1 7
+[MCTS] sims=9676 sims/s=27645 temps_ms=350
+Send move 4 5
+IA move 3 6
+[MCTS] sims=10093 sims/s=28837 temps_ms=350
+Send move 0 2
+IA move 0 7
+[MCTS] sims=10890 sims/s=31114 temps_ms=350
+Send move 1 3
+IA move 3 2
+[MCTS] tactique directe
+Send move 2 7
+IA move 6 3
+[MCTS] sims=13112 sims/s=37462 temps_ms=350
+Send move 0 1
+IA move 2 4
+[MCTS] sims=13459 sims/s=38454 temps_ms=350
+Send move 8 3
+IA move 8 0
+[MCTS] sims=15108 sims/s=43165 temps_ms=350
+Send move 7 2
+IA move 3 7
+[MCTS] sims=16438 sims/s=46965 temps_ms=350
+Send move 0 4
+IA move 2 3
+[MCTS] tactique directe
+Send move 7 1
+Joueur gagne sous-plateau (2,0)
+IA move 3 5
+[MCTS] sims=18985 sims/s=54242 temps_ms=350
+Send move 2 8
+IA move 6 7
+[MCTS] tactique directe
+Send move 2 5
+IA move 8 8
+[MCTS] sims=20060 sims/s=57314 temps_ms=350
+Send move 8 7
+IA move 8 5
+[MCTS] sims=21590 sims/s=61685 temps_ms=350
+Send move 7 6
+IA move 4 2
+IA gagne sous-plateau (1,0)
+[MCTS] tactique directe
+Send move 3 8
+IA move 0 6
+[MCTS] tactique directe
+Send move 0 0
+Joueur gagne sous-plateau (0,0)
+IA move 4 4
+IA gagne sous-plateau (1,1)
+[MCTS] tactique directe
+Send move 2 6
+Joueur gagne sous-plateau (0,2)
+IA move 5 8
+[MCTS] tactique directe
+Send move 8 6
+Joueur gagne sous-plateau (2,2)
+Game: Winner X (IA) 
+
+Game: ----------- Start game #11 -----------
+Game: AGA plays with X
+Game: IA plays with O
+IA move -1 -1
+[MCTS] sims=7399 sims/s=21140 temps_ms=350
+Send move 8 4
+IA move 7 5
+[MCTS] sims=8547 sims/s=24420 temps_ms=350
+Send move 3 6
+IA move 0 0
+[MCTS] sims=9207 sims/s=26305 temps_ms=350
+Send move 1 1
+IA move 4 4
+[MCTS] sims=10008 sims/s=28594 temps_ms=350
+Send move 5 5
+IA move 6 8
+[MCTS] sims=10771 sims/s=30774 temps_ms=350
+Send move 0 7
+IA move 2 3
+[MCTS] sims=10369 sims/s=29625 temps_ms=350
+Send move 7 2
+IA move 4 6
+[MCTS] sims=11780 sims/s=33657 temps_ms=350
+Send move 3 2
+IA move 1 6
+[MCTS] sims=12524 sims/s=35782 temps_ms=350
+Send move 5 2
+IA move 6 7
+[MCTS] sims=12535 sims/s=35814 temps_ms=350
+Send move 0 4
+IA move 2 4
+[MCTS] sims=14531 sims/s=41517 temps_ms=350
+Send move 8 5
+IA move 6 6
+IA gagne sous-plateau (2,2)
+[MCTS] sims=14226 sims/s=40645 temps_ms=350
+Send move 1 0
+IA move 4 2
+[MCTS] sims=13843 sims/s=39551 temps_ms=350
+Send move 3 8
+IA move 2 6
+[MCTS] sims=17123 sims/s=48922 temps_ms=350
+Send move 6 1
+IA move 2 5
+IA gagne sous-plateau (0,1)
+[MCTS] tactique directe
+Send move 1 2
+Joueur gagne sous-plateau (0,0)
+IA move 4 7
+[MCTS] sims=22965 sims/s=65614 temps_ms=350
+Send move 5 4
+IA move 8 3
+[MCTS] sims=24184 sims/s=69097 temps_ms=350
+Send move 8 1
+IA move 7 3
+[MCTS] sims=27205 sims/s=77728 temps_ms=350
+Send move 5 1
+IA move 6 5
+[MCTS] tactique directe
+Send move 0 6
+IA move 5 3
+[MCTS] tactique directe
+Send move 7 1
+Joueur gagne sous-plateau (2,0)
+IA move 3 5
+IA gagne sous-plateau (1,1)
+[MCTS] tactique directe
+Send move 0 8
+Joueur gagne sous-plateau (0,2)
+Game: Winner O (IA) 
+
+Game: ----------- Start game #12 -----------
+Game: IA plays with X
+Game: AGA plays with O
+IA move 3 3
+[MCTS] sims=9022 sims/s=25777 temps_ms=350
+Send move 0 0
+IA move 1 1
+[MCTS] sims=8548 sims/s=24422 temps_ms=350
+Send move 5 3
+IA move 8 0
+[MCTS] sims=9857 sims/s=28162 temps_ms=350
+Send move 6 2
+IA move 0 6
+[MCTS] sims=10253 sims/s=29294 temps_ms=350
+Send move 0 1
+IA move 1 5
+[MCTS] sims=9781 sims/s=27945 temps_ms=350
+Send move 5 7
+IA move 8 5
+[MCTS] sims=11651 sims/s=33288 temps_ms=350
+Send move 6 7
+IA move 2 5
+[MCTS] sims=12310 sims/s=35171 temps_ms=350
+Send move 7 6
+IA move 3 1
+[MCTS] tactique directe
+Send move 0 5
+IA move 2 8
+[MCTS] sims=13356 sims/s=38160 temps_ms=350
+Send move 7 8
+IA move 3 7
+[MCTS] sims=13452 sims/s=38434 temps_ms=350
+Send move 0 4
+IA move 2 4
+[MCTS] sims=14610 sims/s=41742 temps_ms=350
+Send move 7 3
+IA move 5 1
+[MCTS] sims=17974 sims/s=51354 temps_ms=350
+Send move 7 5
+IA move 3 8
+[MCTS] tactique directe
+Send move 1 7
+IA move 5 5
+[MCTS] tactique directe
+Send move 7 7
+Joueur gagne sous-plateau (2,2)
+IA move 4 4
+IA gagne sous-plateau (1,1)
+[MCTS] tactique directe
+Send move 0 2
+Joueur gagne sous-plateau (0,0)
+IA move 1 8
+[MCTS] tactique directe
+Send move 3 6
+IA move 0 8
+IA gagne sous-plateau (0,2)
+[MCTS] tactique directe
+Send move 0 3
+Joueur gagne sous-plateau (0,1)
+IA move 7 0
+[MCTS] tactique directe
+Send move 4 1
+Game: Winner X (IA) 
+
+Game: ----------- Start game #13 -----------
+Game: AGA plays with X
+Game: IA plays with O
+IA move -1 -1
+[MCTS] sims=8166 sims/s=23331 temps_ms=350
+Send move 7 0
+IA move 4 1
+[MCTS] sims=9469 sims/s=27054 temps_ms=350
+Send move 4 3
+IA move 5 2
+[MCTS] sims=9365 sims/s=26757 temps_ms=350
+Send move 8 7
+IA move 6 4
+[MCTS] sims=9124 sims/s=26068 temps_ms=350
+Send move 1 3
+IA move 3 0
+IA gagne sous-plateau (1,0)
+[MCTS] sims=8881 sims/s=25374 temps_ms=350
+Send move 2 0
+IA move 8 0
+[MCTS] sims=10598 sims/s=30280 temps_ms=350
+Send move 7 2
+IA move 5 7
+[MCTS] sims=10832 sims/s=30948 temps_ms=350
+Send move 6 5
+IA move 0 8
+[MCTS] sims=8316 sims/s=23760 temps_ms=350
+Send move 0 7
+IA move 0 4
+[MCTS] sims=11038 sims/s=31537 temps_ms=350
+Send move 0 5
+IA move 2 8
+[MCTS] sims=12732 sims/s=36377 temps_ms=350
+Send move 6 8
+IA move 1 8
+IA gagne sous-plateau (0,2)
+[MCTS] sims=12917 sims/s=36905 temps_ms=350
+Send move 3 7
+IA move 1 4
+[MCTS] sims=14733 sims/s=42094 temps_ms=350
+Send move 4 4
+IA move 4 5
+[MCTS] sims=15421 sims/s=44060 temps_ms=350
+Send move 5 6
+IA move 7 1
+[MCTS] sims=15302 sims/s=43720 temps_ms=350
+Send move 3 4
+IA move 2 4
+IA gagne sous-plateau (0,1)
+[MCTS] sims=17533 sims/s=50094 temps_ms=350
+Send move 8 4
+IA move 8 3
+[MCTS] tactique directe
+Send move 6 2
+IA move 1 2
+[MCTS] sims=19610 sims/s=56028 temps_ms=350
+Send move 4 8
+IA move 4 7
+[MCTS] tactique directe
+Send move 5 4
+Joueur gagne sous-plateau (1,1)
+IA move 7 5
+[MCTS] sims=24817 sims/s=70905 temps_ms=350
+Send move 5 8
+IA move 7 8
+[MCTS] tactique directe
+Send move 3 8
+Joueur gagne sous-plateau (1,2)
+IA move 2 2
+[MCTS] sims=33291 sims/s=95117 temps_ms=350
+Send move 8 6
+IA move 8 2
+[MCTS] tactique directe
+Send move 7 7
+Joueur gagne sous-plateau (2,2)
+Game: Winner O (IA) 
+
+Game: ----------- Start game #14 -----------
+Game: IA plays with X
+Game: AGA plays with O
+IA move 5 5
+[MCTS] sims=7935 sims/s=22671 temps_ms=350
+Send move 8 6
+IA move 6 0
+[MCTS] sims=8534 sims/s=24382 temps_ms=350
+Send move 0 2
+IA move 0 8
+[MCTS] sims=9589 sims/s=27397 temps_ms=350
+Send move 2 7
+IA move 6 3
+[MCTS] sims=10218 sims/s=29194 temps_ms=350
+Send move 0 0
+IA move 0 1
+[MCTS] sims=11031 sims/s=31517 temps_ms=350
+Send move 2 5
+IA move 7 7
+[MCTS] sims=10698 sims/s=30565 temps_ms=350
+Send move 5 3
+IA move 7 0
+[MCTS] sims=11166 sims/s=31902 temps_ms=350
+Send move 4 0
+IA move 5 0
+[MCTS] tactique directe
+Send move 8 0
+IA move 7 1
+[MCTS] sims=11919 sims/s=34054 temps_ms=350
+Send move 3 5
+IA move 0 7
+[MCTS] sims=13873 sims/s=39637 temps_ms=350
+Send move 0 5
+IA move 0 6
+IA gagne sous-plateau (0,2)
+[MCTS] sims=13775 sims/s=39357 temps_ms=350
+Send move 2 0
+IA move 7 2
+IA gagne sous-plateau (2,0)
+[MCTS] sims=15001 sims/s=42860 temps_ms=350
+Send move 3 7
+IA move 1 5
+[MCTS] sims=17002 sims/s=48577 temps_ms=350
+Send move 5 7
+IA move 6 4
+[MCTS] sims=17734 sims/s=50668 temps_ms=350
+Send move 0 4
+IA move 2 4
+[MCTS] tactique directe
+Send move 6 5
+IA move 3 3
+[MCTS] tactique directe
+Send move 1 0
+Joueur gagne sous-plateau (0,0)
+IA move 3 1
+[MCTS] tactique directe
+Send move 0 3
+Joueur gagne sous-plateau (0,1)
+Game: Winner X (IA) 
+
+Game: ----------- Start game #15 -----------
+Game: AGA plays with X
+Game: IA plays with O
+IA move -1 -1
+[MCTS] sims=7423 sims/s=21208 temps_ms=350
+Send move 0 2
+IA move 2 6
+[MCTS] sims=8477 sims/s=24220 temps_ms=350
+Send move 8 1
+IA move 8 4
+[MCTS] sims=8507 sims/s=24305 temps_ms=350
+Send move 8 5
+IA move 6 6
+[MCTS] sims=9832 sims/s=28091 temps_ms=350
+Send move 0 1
+IA move 2 5
+[MCTS] sims=9529 sims/s=27225 temps_ms=350
+Send move 7 7
+IA move 4 4
+[MCTS] sims=11150 sims/s=31857 temps_ms=350
+Send move 3 3
+IA move 1 2
+[MCTS] sims=11638 sims/s=33251 temps_ms=350
+Send move 3 7
+IA move 1 5
+[MCTS] sims=12618 sims/s=36051 temps_ms=350
+Send move 3 8
+IA move 2 7
+[MCTS] sims=12391 sims/s=35402 temps_ms=350
+Send move 7 5
+IA move 4 8
+[MCTS] tactique directe
+Send move 3 6
+Joueur gagne sous-plateau (1,2)
+IA move 1 0
+[MCTS] sims=15581 sims/s=44517 temps_ms=350
+Send move 4 0
+IA move 3 1
+[MCTS] tactique directe
+Send move 0 5
+IA move 2 8
+IA gagne sous-plateau (0,2)
+[MCTS] sims=18139 sims/s=51825 temps_ms=350
+Send move 8 7
+IA move 6 4
+[MCTS] sims=18601 sims/s=53145 temps_ms=350
+Send move 0 3
+IA move 1 1
+IA gagne sous-plateau (0,0)
+[MCTS] sims=21064 sims/s=60182 temps_ms=350
+Send move 4 3
+IA move 5 0
+[MCTS] sims=23641 sims/s=67545 temps_ms=350
+Send move 7 0
+IA move 4 1
+[MCTS] tactique directe
+Send move 5 3
+Joueur gagne sous-plateau (1,1)
+IA move 8 0
+[MCTS] sims=30114 sims/s=86040 temps_ms=350
+Send move 8 2
+IA move 8 6
+[MCTS] sims=31386 sims/s=89674 temps_ms=350
+Send move 6 0
+IA move 2 3
+[MCTS] tactique directe
+Send move 7 1
+Joueur gagne sous-plateau (2,0)
+Game: Winner O (IA) 
+
+Game: ----------- Start game #16 -----------
+Game: IA plays with X
+Game: AGA plays with O
+IA move 5 5
+[MCTS] sims=8910 sims/s=25457 temps_ms=350
+Send move 8 6
+IA move 6 2
+[MCTS] sims=9059 sims/s=25882 temps_ms=350
+Send move 2 6
+IA move 6 0
+[MCTS] sims=9499 sims/s=27140 temps_ms=350
+Send move 1 1
+IA move 5 3
+[MCTS] tactique directe
+Send move 6 1
+IA move 1 3
+[MCTS] sims=10325 sims/s=29500 temps_ms=350
+Send move 4 0
+IA move 5 1
+[MCTS] sims=10608 sims/s=30308 temps_ms=350
+Send move 6 5
+IA move 1 7
+[MCTS] tactique directe
+Send move 5 4
+IA move 7 5
+[MCTS] sims=10953 sims/s=31294 temps_ms=350
+Send move 3 7
+IA move 1 5
+[MCTS] sims=11705 sims/s=33442 temps_ms=350
+Send move 5 7
+IA move 7 3
+[MCTS] sims=14998 sims/s=42851 temps_ms=350
+Send move 5 0
+IA move 8 2
+[MCTS] sims=17434 sims/s=49811 temps_ms=350
+Send move 8 7
+IA move 6 4
+[MCTS] tactique directe
+Send move 1 4
+IA move 3 4
+[MCTS] sims=18210 sims/s=52028 temps_ms=350
+Send move 0 3
+IA move 2 1
+[MCTS] tactique directe
+Send move 7 4
+IA move 3 3
+[MCTS] sims=19897 sims/s=56848 temps_ms=350
+Send move 1 2
+IA move 4 7
+[MCTS] tactique directe
+Send move 3 5
+IA move 2 8
+[MCTS] tactique directe
+Send move 8 8
+Joueur gagne sous-plateau (2,2)
+IA move 0 6
+IA gagne sous-plateau (0,2)
+[MCTS] tactique directe
+Send move 1 0
+Joueur gagne sous-plateau (0,0)
+IA move 4 2
+[MCTS] sims=28699 sims/s=81997 temps_ms=350
+Send move 4 6
+IA move 3 0
+[MCTS] tactique directe
+Send move 2 5
+Joueur gagne sous-plateau (0,1)
+IA move 4 3
+IA gagne sous-plateau (1,1)
+[MCTS] sims=34350 sims/s=98142 temps_ms=350
+Send move 5 2
+Game: Winner X (IA) 
+
+Game: ----------- Start game #17 -----------
+Game: AGA plays with X
+Game: IA plays with O
+IA move -1 -1
+[MCTS] sims=7255 sims/s=20728 temps_ms=350
+Send move 4 4
+IA move 3 5
+[MCTS] sims=8920 sims/s=25485 temps_ms=350
+Send move 2 6
+IA move 8 0
+[MCTS] sims=8994 sims/s=25697 temps_ms=350
+Send move 7 0
+IA move 4 0
+[MCTS] sims=9985 sims/s=28528 temps_ms=350
+Send move 3 1
+IA move 0 4
+[MCTS] sims=10572 sims/s=30205 temps_ms=350
+Send move 0 3
+IA move 2 2
+[MCTS] sims=10826 sims/s=30931 temps_ms=350
+Send move 8 8
+IA move 6 6
+[MCTS] sims=11365 sims/s=32471 temps_ms=350
+Send move 2 1
+IA move 8 4
+[MCTS] sims=10871 sims/s=31060 temps_ms=350
+Send move 6 5
+IA move 0 8
+[MCTS] sims=12104 sims/s=34582 temps_ms=350
+Send move 2 8
+IA move 6 7
+[MCTS] sims=12997 sims/s=37134 temps_ms=350
+Send move 1 3
+IA move 4 2
+[MCTS] sims=14268 sims/s=40765 temps_ms=350
+Send move 3 7
+IA move 2 3
+[MCTS] sims=15622 sims/s=44634 temps_ms=350
+Send move 7 2
+IA move 5 7
+[MCTS] sims=17691 sims/s=50545 temps_ms=350
+Send move 6 4
+IA move 2 4
+[MCTS] tactique directe
+Send move 6 3
+Joueur gagne sous-plateau (2,1)
+IA move 1 2
+[MCTS] sims=22323 sims/s=63780 temps_ms=350
+Send move 4 8
+IA move 4 6
+[MCTS] tactique directe
+Send move 4 1
+IA move 4 5
+[MCTS] sims=22723 sims/s=64922 temps_ms=350
+Send move 5 6
+IA move 6 2
+[MCTS] tactique directe
+Send move 2 7
+Joueur gagne sous-plateau (0,2)
+IA move 6 8
+IA gagne sous-plateau (2,2)
+[MCTS] tactique directe
+Send move 5 1
+Joueur gagne sous-plateau (1,0)
+IA move 5 5
+IA gagne sous-plateau (1,1)
+[MCTS] tactique directe
+Send move 7 1
+Joueur gagne sous-plateau (2,0)
+Game: Winner O (IA) 
+
+Game: ----------- Start game #18 -----------
+Game: IA plays with X
+Game: AGA plays with O
+IA move 5 5
+[MCTS] sims=8280 sims/s=23657 temps_ms=350
+Send move 6 6
+IA move 1 0
+[MCTS] sims=9164 sims/s=26182 temps_ms=350
+Send move 4 0
+IA move 4 2
+[MCTS] sims=10013 sims/s=28608 temps_ms=350
+Send move 4 8
+IA move 4 7
+[MCTS] sims=9942 sims/s=28405 temps_ms=350
+Send move 3 4
+IA move 0 4
+[MCTS] sims=10482 sims/s=29948 temps_ms=350
+Send move 2 4
+IA move 6 5
+[MCTS] sims=10236 sims/s=29245 temps_ms=350
+Send move 2 8
+IA move 6 7
+[MCTS] sims=10953 sims/s=31294 temps_ms=350
+Send move 2 5
+IA move 8 7
+[MCTS] sims=11995 sims/s=34271 temps_ms=350
+Send move 8 3
+IA move 8 0
+[MCTS] sims=12737 sims/s=36391 temps_ms=350
+Send move 6 2
+IA move 1 6
+[MCTS] sims=14460 sims/s=41314 temps_ms=350
+Send move 3 2
+IA move 0 6
+[MCTS] sims=13998 sims/s=39994 temps_ms=350
+Send move 0 0
+IA move 1 2
+[MCTS] sims=15586 sims/s=44531 temps_ms=350
+Send move 5 8
+IA move 7 7
+IA gagne sous-plateau (2,2)
+[MCTS] sims=19396 sims/s=55417 temps_ms=350
+Send move 3 3
+IA move 1 1
+IA gagne sous-plateau (0,0)
+[MCTS] tactique directe
+Send move 3 5
+Joueur gagne sous-plateau (1,1)
+IA move 2 6
+IA gagne sous-plateau (0,2)
+[MCTS] sims=23530 sims/s=67228 temps_ms=350
+Send move 8 1
+IA move 7 5
+[MCTS] tactique directe
+Send move 3 8
+Joueur gagne sous-plateau (1,2)
+IA move 2 3
+[MCTS] sims=27433 sims/s=78380 temps_ms=350
+Send move 8 2
+IA move 5 0
+[MCTS] tactique directe
+Send move 7 2
+Joueur gagne sous-plateau (2,0)
+IA move 0 5
+[MCTS] tactique directe
+Send move 0 3
+Game: Winner X (IA) 
+
+Game: ----------- Start game #19 -----------
+Game: AGA plays with X
+Game: IA plays with O
+IA move -1 -1
+[MCTS] sims=8076 sims/s=23074 temps_ms=350
+Send move 3 4
+IA move 1 5
+[MCTS] sims=9050 sims/s=25857 temps_ms=350
+Send move 5 6
+IA move 6 0
+[MCTS] sims=9406 sims/s=26874 temps_ms=350
+Send move 0 0
+IA move 2 0
+[MCTS] sims=9331 sims/s=26660 temps_ms=350
+Send move 8 2
+IA move 6 8
+[MCTS] sims=10232 sims/s=29234 temps_ms=350
+Send move 0 8
+IA move 2 7
+[MCTS] sims=10509 sims/s=30025 temps_ms=350
+Send move 7 3
+IA move 5 2
+[MCTS] sims=11299 sims/s=32282 temps_ms=350
+Send move 7 7
+IA move 4 4
+[MCTS] sims=11490 sims/s=32828 temps_ms=350
+Send move 3 5
+IA move 0 7
+[MCTS] sims=12303 sims/s=35151 temps_ms=350
+Send move 2 4
+IA move 6 3
+[MCTS] sims=12553 sims/s=35865 temps_ms=350
+Send move 0 2
+IA move 2 6
+[MCTS] sims=13137 sims/s=37534 temps_ms=350
+Send move 6 2
+IA move 2 8
+IA gagne sous-plateau (0,2)
+[MCTS] sims=16031 sims/s=45802 temps_ms=350
+Send move 7 8
+IA move 3 7
+[MCTS] sims=16732 sims/s=47805 temps_ms=350
+Send move 2 3
+IA move 7 0
+[MCTS] sims=19650 sims/s=56142 temps_ms=350
+Send move 4 2
+IA move 4 8
+[MCTS] sims=20732 sims/s=59234 temps_ms=350
+Send move 5 7
+IA move 6 4
+[MCTS] tactique directe
+Send move 2 5
+Joueur gagne sous-plateau (0,1)
+IA move 6 6
+[MCTS] tactique directe
+Send move 0 1
+Joueur gagne sous-plateau (0,0)
+IA move 6 7
+IA gagne sous-plateau (2,2)
+[MCTS] tactique directe
+Send move 3 3
+Joueur gagne sous-plateau (1,1)
+IA move 5 8
+[MCTS] tactique directe
+Send move 7 2
+Joueur gagne sous-plateau (2,0)
+Game: Winner O (IA) 
+
+Game: ----------- Start game #20 -----------
+Game: IA plays with X
+Game: AGA plays with O
+IA move 5 5
+[MCTS] sims=8875 sims/s=25357 temps_ms=350
+Send move 8 8
+IA move 6 6
+[MCTS] sims=9265 sims/s=26471 temps_ms=350
+Send move 2 0
+IA move 7 0
+[MCTS] sims=9700 sims/s=27714 temps_ms=350
+Send move 3 0
+IA move 0 2
+[MCTS] sims=9629 sims/s=27511 temps_ms=350
+Send move 0 8
+IA move 1 8
+[MCTS] sims=9951 sims/s=28431 temps_ms=350
+Send move 3 8
+IA move 1 7
+[MCTS] sims=9928 sims/s=28365 temps_ms=350
+Send move 5 3
+IA move 8 0
+[MCTS] tactique directe
+Send move 6 0
+IA move 0 1
+[MCTS] sims=12543 sims/s=35837 temps_ms=350
+Send move 2 4
+IA move 8 4
+[MCTS] sims=11943 sims/s=34122 temps_ms=350
+Send move 7 5
+IA move 4 6
+[MCTS] sims=13788 sims/s=39394 temps_ms=350
+Send move 4 0
+IA move 5 0
+[MCTS] sims=14135 sims/s=40385 temps_ms=350
+Send move 6 1
+IA move 1 4
+[MCTS] sims=17055 sims/s=48728 temps_ms=350
+Send move 4 4
+IA move 3 5
+[MCTS] tactique directe
+Send move 1 6
+IA move 5 1
+[MCTS] sims=17094 sims/s=48840 temps_ms=350
+Send move 7 3
+IA move 5 2
+IA gagne sous-plateau (1,0)
+[MCTS] sims=20716 sims/s=59188 temps_ms=350
+Send move 6 8
+IA move 0 7
+[MCTS] sims=21521 sims/s=61488 temps_ms=350
+Send move 1 5
+IA move 4 8
+[MCTS] tactique directe
+Send move 4 7
+IA move 4 5
+IA gagne sous-plateau (1,1)
+[MCTS] tactique directe
+Send move 5 6
+Joueur gagne sous-plateau (1,2)
+IA move 6 2
+[MCTS] tactique directe
+Send move 2 7
+IA move 7 4
+[MCTS] tactique directe
+Send move 7 8
+Joueur gagne sous-plateau (2,2)
+IA move 7 1
+IA gagne sous-plateau (2,0)
+[MCTS] tactique directe
+Send move 0 0
+IA move 2 1
+[MCTS] tactique directe
+Send move 6 4
+IA move 0 4
+[MCTS] sims=36137 sims/s=103248 temps_ms=350
+Send move 0 5
+IA move 2 8
+[MCTS] tactique directe
+Send move 1 0
+Joueur gagne sous-plateau (0,0)
+Game: Winner X (IA) 
+
+Game: ----------- Start game #21 -----------
+Game: AGA plays with X
+Game: IA plays with O
+IA move -1 -1
+[MCTS] sims=7688 sims/s=21965 temps_ms=350
+Send move 3 5
+IA move 1 7
+[MCTS] sims=8669 sims/s=24768 temps_ms=350
+Send move 3 3
+IA move 0 1
+[MCTS] sims=9557 sims/s=27305 temps_ms=350
+Send move 2 3
+IA move 8 0
+[MCTS] sims=9841 sims/s=28117 temps_ms=350
+Send move 7 1
+IA move 3 4
+[MCTS] sims=9858 sims/s=28165 temps_ms=350
+Send move 2 5
+IA move 6 8
+[MCTS] sims=10591 sims/s=30260 temps_ms=350
+Send move 0 6
+IA move 1 0
+[MCTS] sims=11318 sims/s=32337 temps_ms=350
+Send move 3 0
+IA move 0 0
+[MCTS] tactique directe
+Send move 0 2
+IA move 1 6
+[MCTS] sims=12538 sims/s=35822 temps_ms=350
+Send move 4 0
+IA move 5 0
+[MCTS] sims=12810 sims/s=36600 temps_ms=350
+Send move 8 1
+IA move 7 5
+[MCTS] sims=12094 sims/s=34554 temps_ms=350
+Send move 5 7
+IA move 8 5
+[MCTS] sims=14373 sims/s=41065 temps_ms=350
+Send move 8 7
+IA move 8 4
+[MCTS] tactique directe
+Send move 6 5
+IA move 1 8
+IA gagne sous-plateau (0,2)
+[MCTS] sims=15635 sims/s=44671 temps_ms=350
+Send move 3 8
+IA move 2 0
+IA gagne sous-plateau (0,0)
+[MCTS] tactique directe
+Send move 6 1
+Joueur gagne sous-plateau (2,0)
+IA move 1 4
+[MCTS] sims=19637 sims/s=56105 temps_ms=350
+Send move 4 4
+IA move 5 5
+[MCTS] sims=19081 sims/s=54517 temps_ms=350
+Send move 8 8
+IA move 7 7
+[MCTS] tactique directe
+Send move 5 3
+Joueur gagne sous-plateau (1,1)
+IA move 2 4
+[MCTS] tactique directe
+Send move 8 3
+Game: Winner O (IA) 
+
+Game: ----------- Start game #22 -----------
+Game: IA plays with X
+Game: AGA plays with O
+IA move 5 5
+[MCTS] sims=9035 sims/s=25814 temps_ms=350
+Send move 7 6
+IA move 3 0
+[MCTS] sims=9004 sims/s=25725 temps_ms=350
+Send move 2 0
+IA move 7 1
+[MCTS] sims=9152 sims/s=26148 temps_ms=350
+Send move 3 4
+IA move 2 4
+[MCTS] sims=9779 sims/s=27940 temps_ms=350
+Send move 8 4
+IA move 7 3
