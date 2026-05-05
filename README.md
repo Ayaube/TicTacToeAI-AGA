@@ -27,6 +27,27 @@ Campagne MEDIUM_1 sur 100 parties terminees:
 Log garde dans le repo:
 - `test-logs/run_med1_soutenance_100done.log`
 
+## Dernier essai experimental
+
+Branche: `ayoub_fusion_opti`
+
+Idee testee:
+- malus sur les coups libres;
+- evaluation statique aware du coup libre;
+- PVS + History Heuristic;
+- budget 1000 ms avec marge interne.
+
+Resultat `MEDIUM_2` reel sur 100 parties:
+- 21 victoires
+- 76 defaites
+- 3 nuls
+- 21.65% hors nuls
+
+Log garde dans le repo:
+- `test-logs/run_fusion_med2.log`
+
+Conclusion: cette fusion ne bat pas la meilleure reference connue a 23.16%. Elle reste documentee comme essai, pas comme version validee.
+
 ## Ce qu'on a change vs template du prof
 Le template du prof c'etait surtout un squelette qui envoie des coups.
 Nous on a ajoute:
@@ -60,6 +81,7 @@ On prefere un algo propre qu'on comprend a 100% plutot qu'un truc ultra avance m
 
 ## Suite prevue
 Prochaine etape:
-- tester une version MCTS propre
-- garder minimax en fallback
-- comparer les deux sur des campagnes longues (pas juste 3 parties vite fait)
+- lire le nouveau DeepSearch fourni par l'equipe
+- lire l'analyse Claude Opus des logs
+- tester une hypothese locale et mesurable
+- comparer au meilleur seuil connu sur MEDIUM_2

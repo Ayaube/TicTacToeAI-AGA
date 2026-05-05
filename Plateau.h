@@ -34,6 +34,7 @@ private:
     // Donnees : tableaux plats, pas de vector -> zero allocation dans minimax
     std::array<std::array<int,9>,9> m_g; // grille 9x9
     std::array<std::array<int,3>,3> m_e; // etat meta 3x3
+    std::array<int,81> m_history;         // score historique par case
 
     int  jouerCoup(int row, int col, int joueur);
     void annulerCoup(int row, int col, int ancienEtat);
@@ -44,7 +45,7 @@ private:
 
     int minimax(GameMove last, int depth, int alpha, int beta, int joueur);
 
-    int evaluer();
+    int evaluer(GameMove last, int joueurCourant);
     int urgenceMetaGrille(int joueur);
 };
 

@@ -10,11 +10,12 @@
 using namespace std;
 using namespace std::chrono;
 
-static const int TIMEOUT_MS = 350;
+static const int TIMEOUT_MS = 1000;
+static const int TIMEOUT_MARGIN_MS = 50;
 static time_point<steady_clock> g_debut;
 
 static bool tempsEcoule() {
-    return duration_cast<milliseconds>(steady_clock::now() - g_debut).count() >= TIMEOUT_MS;
+    return duration_cast<milliseconds>(steady_clock::now() - g_debut).count() >= TIMEOUT_MS - TIMEOUT_MARGIN_MS;
 }
 
 // ============================================================
@@ -23,6 +24,7 @@ static bool tempsEcoule() {
 Plateau::Plateau() {
     for (auto& r : m_g) r.fill(0);
     for (auto& r : m_e) r.fill(0);
+    m_history.fill(0);
 }
 Plateau::~Plateau() {}
 
@@ -146,9 +148,10 @@ int Plateau::getCoupsLegauxFast(const GameMove& last, GameMove buf[MAX_MOVES]) {
 // ============================================================
 static int scorerCoupRapide(const GameMove& c,
                               const array<array<int,9>,9>& g,
-                              const array<array<int,3>,3>& e)
+                              const array<array<int,3>,3>& e,
+                              const array<int,81>& history)
 {
-    int score = 0;
+    int score = history[c.row*9 + c.col];
     int si = c.row/3, sj = c.col/3;
     int li = c.row%3, lj = c.col%3;
     int dL = si*3, dC = sj*3;
@@ -208,9 +211,9 @@ static int scorerCoupRapide(const GameMove& c,
     // ---- Sous-plateau cible apres ce coup ----
     // On envoie l'adversaire dans le sous-plateau (li, lj)
     int siC = li, sjC = lj;
-    // Si ce sous-plateau est deja termine, l'adversaire joue partout -> neutre
+    // Si ce sous-plateau est deja termine, l'adversaire joue partout.
     if (e[siC][sjC] != 0) {
-        score += 100; // on lui donne la liberte, pas forcement mauvais
+        score -= 500;
     } else {
         // Eviter d'envoyer dans le centre meta (trop fort pour l'adversaire)
         if (siC==1 && sjC==1) score -= 200;
@@ -229,7 +232,7 @@ vector<GameMove> Plateau::getCoupsLegaux(const GameMove& last) {
     int n = getCoupsLegauxFast(last, buf);
     vector<GameMove> coups(buf, buf+n);
     sort(coups.begin(), coups.end(), [&](const GameMove& a, const GameMove& b) {
-        return scorerCoupRapide(a,m_g,m_e) > scorerCoupRapide(b,m_g,m_e);
+        return scorerCoupRapide(a,m_g,m_e,m_history) > scorerCoupRapide(b,m_g,m_e,m_history);
     });
     return coups;
 }
@@ -289,12 +292,18 @@ static int poidsStrategique(int si, int sj,
 
 static const int BONUS_POS[3][3] = {{3,2,3},{2,5,2},{3,2,3}};
 
-int Plateau::evaluer() {
+int Plateau::evaluer(GameMove last, int joueurCourant) {
     int v = gagnantMetaGrille();
     if (v == 1)  return SCORE_VICTOIRE;
     if (v == -1) return SCORE_DEFAITE;
 
     int score = 0;
+
+    if (last.row != -1 && last.row >= 0 && last.row < 9
+        && last.col >= 0 && last.col < 9
+        && m_e[last.row % 3][last.col % 3] != 0) {
+        score += joueurCourant * 800;
+    }
 
     // 1. Alignements sur la meta-grille (tres important)
     for (int p : {1, -1}) {
@@ -340,22 +349,22 @@ int Plateau::evaluer() {
 //  Le tri dans minimax utilise un tableau local (tri par insertion)
 // ============================================================
 int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) {
-    if (tempsEcoule()) return evaluer();
+    if (tempsEcoule()) return evaluer(last, joueur);
 
     int v = gagnantMetaGrille();
     if (v ==  1) return SCORE_VICTOIRE + depth;
     if (v == -1) return SCORE_DEFAITE  - depth;
-    if (depth == 0) return evaluer();
+    if (depth == 0) return evaluer(last, joueur);
 
     GameMove buf[MAX_MOVES];
     int n = getCoupsLegauxFast(last, buf);
-    if (n == 0) return evaluer();
+    if (n == 0) return evaluer(last, joueur);
 
     // Tri par insertion (zero allocation, efficace pour n <= ~20 coups typiques)
     // On ne trie que si depth > 1 pour amortir le cout
     if (depth > 1) {
         int scores[MAX_MOVES];
-        for (int k = 0; k < n; k++) scores[k] = scorerCoupRapide(buf[k], m_g, m_e);
+        for (int k = 0; k < n; k++) scores[k] = scorerCoupRapide(buf[k], m_g, m_e, m_history);
         for (int k = 1; k < n; k++) {
             GameMove cm = buf[k]; int cs = scores[k]; int kk = k-1;
             while (kk >= 0 && scores[kk] < cs) {
@@ -370,11 +379,22 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
         for (int k = 0; k < n; k++) {
             if (tempsEcoule()) break;
             int anc = jouerCoup(buf[k].row, buf[k].col, 1);
-            int s   = minimax(buf[k], depth-1, alpha, beta, -1);
+            int s;
+            if (k == 0) {
+                s = minimax(buf[k], depth-1, alpha, beta, -1);
+            } else {
+                s = minimax(buf[k], depth-1, alpha, alpha + 1, -1);
+                if (s > alpha && s < beta && !tempsEcoule()) {
+                    s = minimax(buf[k], depth-1, alpha, beta, -1);
+                }
+            }
             annulerCoup(buf[k].row, buf[k].col, anc);
             if (s > best) best = s;
             if (best > alpha) alpha = best;
-            if (beta <= alpha) break;
+            if (beta <= alpha) {
+                m_history[buf[k].row*9 + buf[k].col] += depth * depth;
+                break;
+            }
         }
         return best;
     } else {
@@ -382,11 +402,22 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
         for (int k = 0; k < n; k++) {
             if (tempsEcoule()) break;
             int anc = jouerCoup(buf[k].row, buf[k].col, -1);
-            int s   = minimax(buf[k], depth-1, alpha, beta, 1);
+            int s;
+            if (k == 0) {
+                s = minimax(buf[k], depth-1, alpha, beta, 1);
+            } else {
+                s = minimax(buf[k], depth-1, beta - 1, beta, 1);
+                if (s > alpha && s < beta && !tempsEcoule()) {
+                    s = minimax(buf[k], depth-1, alpha, beta, 1);
+                }
+            }
             annulerCoup(buf[k].row, buf[k].col, anc);
             if (s < best) best = s;
             if (best < beta) beta = best;
-            if (beta <= alpha) break;
+            if (beta <= alpha) {
+                m_history[buf[k].row*9 + buf[k].col] += depth * depth;
+                break;
+            }
         }
         return best;
     }
@@ -396,6 +427,8 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
 //  Point d'entree : approfondissement iteratif
 // ============================================================
 void Plateau::prochainMove(GameMove& myMove, GameMove& lastMove) {
+    m_history.fill(0);
+
     vector<GameMove> coups = getCoupsLegaux(lastMove); // tri initial
     int n = (int)coups.size();
     if (n == 0) return;
