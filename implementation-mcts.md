@@ -138,6 +138,33 @@ Le minimax doit rester disponible comme fallback a tout moment.
   - ils ont ete arretes avec `taskkill /IM ia_minimax.exe /F` et `taskkill /IM ia_mcts.exe /F`.
   - a surveiller: la lib/GUI peut garder le process ouvert meme apres log `Finish`, donc toujours verifier `tasklist`.
 
+### 2026-05-05 - Campagne MCTS MEDIUM_2
+
+- Commit pousse avant test:
+  - `76ce098` (`ajoute tentative mcts mesurable`)
+- Binaire VM:
+  - `ia_mcts.exe`, build avec `-DACTIVER_MCTS`
+- Commande de campagne:
+  - `ia_mcts.exe arena med2 100 0 AGA`
+- Log VM:
+  - `C:\Users\ayoub\projets\Projet\TicTacToeAI-AGA-mcts-bench\run_mcts_med2.log`
+- Logs locaux:
+  - `/Users/aubepine/Documents/Coding/Projet TicTacToe/test-logs/run_mcts_med2.log`
+  - `test-logs/run_mcts_med2.log`
+- Resultat:
+  - starts = 100
+  - wins = 98
+  - losses = 0
+  - draws = 2
+  - ratio lib: `Player win ratio : 98%`, `IA win ratio : 0%`
+- Performance observee:
+  - fin de log: environ 30k a 48k simulations par coup en 350 ms.
+  - ordre de grandeur: 88k a 136k simulations/seconde.
+- Conclusion:
+  - MCTS minimal bat tres largement MEDIUM_2 sur cette campagne.
+  - C'est un vrai cap par rapport aux essais minimax MEDIUM_2 precedents.
+  - Prochaine etape raisonnable: refaire une deuxieme campagne MEDIUM_2 pour verifier la variance, puis tester HARD_1.
+
 ## Implementation en cours
 
 - Ajout de `resultatPartie()`:
