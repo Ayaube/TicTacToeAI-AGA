@@ -138,32 +138,46 @@ Le minimax doit rester disponible comme fallback a tout moment.
   - ils ont ete arretes avec `taskkill /IM ia_minimax.exe /F` et `taskkill /IM ia_mcts.exe /F`.
   - a surveiller: la lib/GUI peut garder le process ouvert meme apres log `Finish`, donc toujours verifier `tasklist`.
 
-### 2026-05-05 - Campagne MCTS MEDIUM_2
+### 2026-05-05 - Correction test MEDIUM_2 invalide
 
-- Commit pousse avant test:
+- Erreur detectee au moment de lancer HARD_1:
+  - `main.cpp` utilisait `constexpr Level LEVEL = Level::MEDIUM_1`.
+  - les arguments `med2` / `hard1` passes au `.exe` ne changeaient donc pas le niveau.
+  - le log nomme `run_mcts_med2.log` contenait en fait `Game: - Level : Medium 1`.
+- Decision:
+  - ne pas utiliser ce log comme preuve MEDIUM_2.
+  - supprimer `test-logs/run_mcts_med2.log` du repo pour eviter une preuve trompeuse.
+  - ajouter une selection de niveau par macro de compilation dans `main.cpp`.
+- Macros disponibles:
+  - par defaut: `MEDIUM_1`
+  - `-DNIVEAU_MEDIUM_2`: compile en `MEDIUM_2`
+  - `-DNIVEAU_HARD_1`: compile en `HARD_1`
+
+### 2026-05-05 - Campagne MCTS HARD_1
+
+- Commit de base:
   - `76ce098` (`ajoute tentative mcts mesurable`)
 - Binaire VM:
-  - `ia_mcts.exe`, build avec `-DACTIVER_MCTS`
+  - `ia_mcts_hard1.exe`, build avec `-DACTIVER_MCTS -DNIVEAU_HARD_1`
 - Commande de campagne:
-  - `ia_mcts.exe arena med2 100 0 AGA`
+  - `ia_mcts_hard1.exe`
 - Log VM:
-  - `C:\Users\ayoub\projets\Projet\TicTacToeAI-AGA-mcts-bench\run_mcts_med2.log`
+  - `C:\Users\ayoub\projets\Projet\TicTacToeAI-AGA-mcts-bench\run_mcts_hard1.log`
 - Logs locaux:
-  - `/Users/aubepine/Documents/Coding/Projet TicTacToe/test-logs/run_mcts_med2.log`
-  - `test-logs/run_mcts_med2.log`
+  - `/Users/aubepine/Documents/Coding/Projet TicTacToe/test-logs/run_mcts_hard1.log`
+  - `test-logs/run_mcts_hard1.log`
 - Resultat:
   - starts = 100
-  - wins = 98
-  - losses = 0
-  - draws = 2
-  - ratio lib: `Player win ratio : 98%`, `IA win ratio : 0%`
+  - wins = 1
+  - losses = 93
+  - draws = 6
+  - ratio lib: `Player win ratio : 1%`, `IA win ratio : 93%`
 - Performance observee:
-  - fin de log: environ 30k a 48k simulations par coup en 350 ms.
-  - ordre de grandeur: 88k a 136k simulations/seconde.
+  - niveau bien confirme par le log: `Game: - Level : Hard 1`.
 - Conclusion:
-  - MCTS minimal bat tres largement MEDIUM_2 sur cette campagne.
-  - C'est un vrai cap par rapport aux essais minimax MEDIUM_2 precedents.
-  - Prochaine etape raisonnable: refaire une deuxieme campagne MEDIUM_2 pour verifier la variance, puis tester HARD_1.
+  - MCTS minimal pur ne passe pas HARD_1.
+  - Le probleme n'est pas seulement le nombre de simulations: les playouts aleatoires se font punir tactiquement.
+  - Prochaine etape: ajouter un playout tactique leger (gagner une sous-grille si possible, bloquer une menace immediate, sinon aleatoire), puis retester MEDIUM_2 reel et HARD_1.
 
 ## Implementation en cours
 

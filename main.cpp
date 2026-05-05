@@ -7,7 +7,15 @@ using namespace std;
 namespace {
 
 constexpr unsigned int NB_GAMES = 100;
+
+#if defined(NIVEAU_MEDIUM_2)
+constexpr Level LEVEL = Level::MEDIUM_2;
+#elif defined(NIVEAU_HARD_1)
+constexpr Level LEVEL = Level::HARD_1;
+#else
 constexpr Level LEVEL = Level::MEDIUM_1;
+#endif
+
 constexpr Mode MODE = Mode::ARENA;
 constexpr bool ALWAYS_PLAY_FIRST = false;
 constexpr const char* ALIAS = "AGA";
