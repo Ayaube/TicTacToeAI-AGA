@@ -1,5 +1,4 @@
 #include <iostream>
-#include <vector>
 #include "main.h"
 #include "Plateau.h"
 
@@ -7,50 +6,46 @@ using namespace std;
 
 int main()
 {
-    // Initialisation de la partie
-    game.initialize(10, Level::MEDIUM_2, Mode::ARENA, false, "AGA");
+    game.initialize(10, Level::MEDIUM_2, Mode::ARENA, false, "Pseudo");
 
     while (!game.isAllGameFinish())
     {
         Plateau plateau;
-
-        // lastMove stocke le dernier coup joue (par l'IA adverse ou par nous)
-        // On l'initialise a {-1,-1} pour signaler "pas encore de coup joue"
-        GameMove lastMove{-1, -1};
-        GameMove myMove{-1, -1};
+        GameMove dernierCoup{-1, -1};
 
         while (!game.isFinish())
         {
-            // Recuperer le coup de l'IA adverse
-            GameMove gameMove{-1, -1};
-            game.getMove(gameMove);
+            // --- Coup adverse ---
+            GameMove coupAdverse{-1, -1};
+            game.getMove(coupAdverse);
 
-            std::cerr << "IA move " << gameMove.row << " " << gameMove.col << std::endl;
+            bool valide = (coupAdverse.row >= 0 && coupAdverse.row < 9 &&
+                           coupAdverse.col >= 0 && coupAdverse.col < 9);
 
-            // Si l'IA a joue un coup valide, on le place sur le plateau
-            if (gameMove.row >= 0 && gameMove.row < 9 &&
-                gameMove.col >= 0 && gameMove.col < 9)
-            {
-                plateau.setCase(gameMove.row, gameMove.col, -1);
-                plateau.verifPlateau();
-                lastMove = gameMove; // le dernier coup joue est celui de l'IA adverse
+            if (valide) {
+                cerr << "[Adverse] (" << coupAdverse.row << "," << coupAdverse.col << ")\n";
+                plateau.jouerIA(coupAdverse.row, coupAdverse.col);
+                dernierCoup = coupAdverse;
+            } else {
+                cerr << "[Adverse] pas de coup -> on joue en premier\n";
+                dernierCoup = {-1, -1};
             }
 
-            // Calculer notre meilleur coup via minimax
-            plateau.prochainMove(myMove, lastMove);
+            // --- Notre coup via Minimax alpha-beta ---
+            GameMove monCoup{-1, -1};
+            plateau.choisirCoup(monCoup, dernierCoup);
 
-            // Envoyer notre coup
-            std::cerr << "Send move " << myMove.row << " " << myMove.col << std::endl;
-            game.setMove(myMove);
-            plateau.setCase(myMove.row, myMove.col, 1);
-            plateau.verifPlateau();
+            cerr << "[Nous]    (" << monCoup.row << "," << monCoup.col << ")\n";
 
-            // Notre coup devient le dernier coup joue
-            lastMove = myMove;
+            game.setMove(monCoup);
+            plateau.jouerNous(monCoup.row, monCoup.col);
+            dernierCoup = monCoup;
         }
 
-        plateau.affiche_plateau();
+        Winner w = game.getWinner();
+        if      (w == Winner::PLAYER)        cerr << ">>> VICTOIRE <<<\n";
+        else if (w == Winner::IA)            cerr << ">>> DEFAITE <<<\n";
+        else if (w == Winner::IA_AND_PLAYER) cerr << ">>> EGALITE <<<\n";
     }
-
     return 0;
 }

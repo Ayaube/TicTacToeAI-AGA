@@ -33,26 +33,36 @@
 	<vector>
 	"main.h"
 
-1777536644 source:c:\users\antoi\esilv\s2\poo cc++ (maeiin360925)\tictactoeai-aga\main.cpp
+1777965146 source:c:\users\antoi\esilv\s2\poo cc++ (maeiin360925)\tictactoeai-aga\main.cpp
 	<iostream>
-	<vector>
 	"main.h"
 	"Plateau.h"
 
 1776866528 c:\users\antoi\esilv\s2\poo cc++ (maeiin360925)\tictactoeai-aga\main.h
 	<string>
 
-1777540713 c:\users\antoi\esilv\s2\poo cc++ (maeiin360925)\tictactoeai-aga\plateau.h
-	<array>
+1777963503 c:\users\antoi\esilv\s2\poo cc++ (maeiin360925)\tictactoeai-aga\plateau.h
 	<vector>
+	<chrono>
 	"main.h"
 
-1777536978 source:c:\users\antoi\esilv\s2\poo cc++ (maeiin360925)\tictactoeai-aga\plateau.cpp
-	<iostream>
-	<vector>
-	<limits>
-	<algorithm>
-	<chrono>
+1777965353 source:c:\users\antoi\esilv\s2\poo cc++ (maeiin360925)\tictactoeai-aga\plateau.cpp
 	"Plateau.h"
+	<iostream>
+	<algorithm>
+	<limits>
+
+1777964725 source:c:\users\antoi\esilv\s2\poo cc++ (maeiin360925)\tictactoeai-aga\mcts.cpp
+	"MCTS.h"
+	<cmath>
+	<algorithm>
+	<limits>
+	<iostream>
+
+1777964715 c:\users\antoi\esilv\s2\poo cc++ (maeiin360925)\tictactoeai-aga\mcts.h
+	<vector>
+	<memory>
+	<chrono>
+	<random>
 	"main.h"
 

@@ -1,418 +1,403 @@
-#include <iostream>
-#include <array>
-#include <vector>
-#include <limits>
-#include <algorithm>
-#include <chrono>
 #include "Plateau.h"
-#include "main.h"
+#include <iostream>
+#include <algorithm>
+#include <limits>
 
 using namespace std;
 using namespace std::chrono;
 
-static const int TIMEOUT_MS = 350;
-static time_point<steady_clock> g_debut;
+static const int TEMPS_MAX_MS = 1500;  // les timeouts sont desactives par le prof
+static const int PROF_MAX = 12;
 
-static bool tempsEcoule() {
-    return duration_cast<milliseconds>(steady_clock::now() - g_debut).count() >= TIMEOUT_MS;
-}
+static const int POIDS_META[3][3] = {
+    {3, 2, 3},
+    {2, 5, 2},   // centre encore plus important
+    {3, 2, 3}
+};
 
 // ============================================================
 //  Constructeur
 // ============================================================
+
 Plateau::Plateau() {
-    for (auto& r : m_g) r.fill(0);
-    for (auto& r : m_e) r.fill(0);
+    for (int i = 0; i < 9; i++)
+        for (int j = 0; j < 9; j++)
+            m_grille[i][j] = 0;
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            m_etat[i][j] = 0;
 }
-Plateau::~Plateau() {}
 
-int  Plateau::getCase(int r, int c)          { return m_g[r][c]; }
-void Plateau::setCase(int r, int c, int val) { m_g[r][c] = val; }
+// ============================================================
+//  Interface publique
+// ============================================================
 
-void Plateau::affiche_plateau() {
-    for (auto& row : m_g) {
-        for (int v : row) cout << v << " ";
+void Plateau::jouerIA(int row, int col) {
+    m_grille[row][col] = -1;
+    mettreAJourEtat(row / 3, col / 3);
+}
+
+void Plateau::jouerNous(int row, int col) {
+    m_grille[row][col] = 1;
+    mettreAJourEtat(row / 3, col / 3);
+}
+
+void Plateau::afficher() const {
+    for (int i = 0; i < 9; i++) {
+        for (int j = 0; j < 9; j++)
+            cout << m_grille[i][j] << " ";
         cout << "\n";
     }
 }
 
 // ============================================================
-//  Gagnant d'un sous-plateau (offset dL, dC)
+//  Utilitaires
 // ============================================================
-int Plateau::gagnant(int dL, int dC) {
-    for (int p : {1, -1}) {
-        auto v = [&](int r, int c) { return m_g[dL+r][dC+c] == p; };
-        if (v(0,0)&&v(1,1)&&v(2,2)) return p;
-        if (v(0,2)&&v(1,1)&&v(2,0)) return p;
-        for (int i = 0; i < 3; i++) {
-            if (v(i,0)&&v(i,1)&&v(i,2)) return p;
-            if (v(0,i)&&v(1,i)&&v(2,i)) return p;
-        }
-    }
-    return 0;
-}
 
-void Plateau::verifPlateau() {
-    for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) {
-        if (m_e[i][j] != 0) continue;
-        int r = gagnant(i*3, j*3);
-        if (r) {
-            m_e[i][j] = r;
-            cout << (r==1 ? "Joueur" : "IA")
-                 << " gagne sous-plateau (" << i << "," << j << ")\n";
-        }
-    }
-}
-
-// ============================================================
-//  Helpers
-// ============================================================
-bool Plateau::estPlein(int si, int sj) {
-    for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++)
-        if (m_g[si*3+i][sj*3+j] == 0) return false;
+bool Plateau::estPlein(int si, int sj) const {
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++)
+            if (m_grille[si*3+i][sj*3+j] == 0) return false;
     return true;
 }
-bool Plateau::estCondamne(int row, int col) {
-    int si = row/3, sj = col/3;
-    return m_e[si][sj] != 0 || estPlein(si, sj);
+
+bool Plateau::estJouable(int si, int sj) const {
+    return m_etat[si][sj] == 0 && !estPlein(si, sj);
 }
-int Plateau::gagnantMetaGrille() {
-    for (int p : {1, -1}) {
-        auto e = [&](int i, int j) { return m_e[i][j] == p; };
-        if (e(0,0)&&e(1,1)&&e(2,2)) return p;
-        if (e(0,2)&&e(1,1)&&e(2,0)) return p;
-        for (int i = 0; i < 3; i++) {
-            if (e(i,0)&&e(i,1)&&e(i,2)) return p;
-            if (e(0,i)&&e(1,i)&&e(2,i)) return p;
-        }
+
+int Plateau::gagnantSous(int si, int sj) const {
+    int dL = si*3, dC = sj*3;
+    for (int j : {1, -1}) {
+        // Diagonales
+        if (m_grille[dL][dC]==j && m_grille[dL+1][dC+1]==j && m_grille[dL+2][dC+2]==j) return j;
+        if (m_grille[dL][dC+2]==j && m_grille[dL+1][dC+1]==j && m_grille[dL+2][dC]==j) return j;
+        // Lignes
+        for (int i = 0; i < 3; i++)
+            if (m_grille[dL+i][dC]==j && m_grille[dL+i][dC+1]==j && m_grille[dL+i][dC+2]==j) return j;
+        // Colonnes
+        for (int k = 0; k < 3; k++)
+            if (m_grille[dL][dC+k]==j && m_grille[dL+1][dC+k]==j && m_grille[dL+2][dC+k]==j) return j;
     }
     return 0;
 }
 
-// ============================================================
-//  Simulation
-// ============================================================
-int Plateau::jouerCoup(int row, int col, int joueur) {
-    m_g[row][col] = joueur;
-    int si = row/3, sj = col/3;
-    int ancien = m_e[si][sj];
-    if (ancien == 0) { int g = gagnant(si*3, sj*3); if (g) m_e[si][sj] = g; }
-    return ancien;
-}
-void Plateau::annulerCoup(int row, int col, int ancienEtat) {
-    m_g[row][col] = 0;
-    m_e[row/3][col/3] = ancienEtat;
-}
-
-// ============================================================
-//  Coups legaux : version FAST (buffer, zero malloc)
-// ============================================================
-int Plateau::getCoupsLegauxFast(const GameMove& last, GameMove buf[MAX_MOVES]) {
-    int n = 0;
-    bool valide = (last.row>=0 && last.row<9 && last.col>=0 && last.col<9);
-
-    auto ajouter = [&](int si, int sj) {
-        for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++)
-            if (m_g[si*3+i][sj*3+j] == 0) buf[n++] = {si*3+i, sj*3+j};
-    };
-
-    if (!valide) {
-        for (int si = 0; si < 3; si++) for (int sj = 0; sj < 3; sj++)
-            if (m_e[si][sj]==0 && !estPlein(si,sj)) ajouter(si,sj);
-    } else {
-        int ci = last.row%3, cj = last.col%3;
-        if (m_e[ci][cj]==0 && !estPlein(ci,cj)) ajouter(ci,cj);
-        else for (int si = 0; si < 3; si++) for (int sj = 0; sj < 3; sj++)
-            if (m_e[si][sj]==0 && !estPlein(si,sj)) ajouter(si,sj);
+int Plateau::gagnantMeta() const {
+    for (int j : {1, -1}) {
+        if (m_etat[0][0]==j && m_etat[1][1]==j && m_etat[2][2]==j) return j;
+        if (m_etat[0][2]==j && m_etat[1][1]==j && m_etat[2][0]==j) return j;
+        for (int i = 0; i < 3; i++)
+            if (m_etat[i][0]==j && m_etat[i][1]==j && m_etat[i][2]==j) return j;
+        for (int k = 0; k < 3; k++)
+            if (m_etat[0][k]==j && m_etat[1][k]==j && m_etat[2][k]==j) return j;
     }
-    return n;
+    return 0;
+}
+
+void Plateau::mettreAJourEtat(int si, int sj) {
+    if (m_etat[si][sj] != 0) return;
+    int g = gagnantSous(si, sj);
+    if (g != 0)
+        m_etat[si][sj] = g;
+    else if (estPlein(si, sj))
+        m_etat[si][sj] = 2; // nul
 }
 
 // ============================================================
-//  Score rapide d'un coup pour le move ordering
-//  (pas de jouerCoup/annulerCoup -> pas de cout)
+//  Coups légaux
 // ============================================================
-static int scorerCoupRapide(const GameMove& c,
-                              const array<array<int,9>,9>& g,
-                              const array<array<int,3>,3>& e)
-{
-    int score = 0;
-    int si = c.row/3, sj = c.col/3;
-    int li = c.row%3, lj = c.col%3;
-    int dL = si*3, dC = sj*3;
 
-    // ---- Position locale ----
-    if (li==1 && lj==1)              score += 300; // centre local
-    else if (li%2==0 && lj%2==0)     score += 150; // coin local
+vector<GameMove> Plateau::coupsLegaux(const GameMove& dernierCoup) const {
+    vector<GameMove> coups;
+    bool libre = true;
 
-    // ---- Position du sous-plateau dans la meta ----
-    if (si==1 && sj==1)              score += 200; // centre meta
-    else if (si%2==0 && sj%2==0)     score += 100; // coin meta
-
-    // ---- Menaces locales (ligne, colonne, diagonales) ----
-    // Ligne locale li
-    {
-        int n1=0, nM=0;
-        for (int jj=0; jj<3; jj++) {
-            int v = g[dL+li][dC+jj];
-            if (v== 1) n1++; else if (v==-1) nM++;
+    if (dernierCoup.row >= 0 && dernierCoup.row < 9 &&
+        dernierCoup.col >= 0 && dernierCoup.col < 9) {
+        int ci = dernierCoup.row % 3;
+        int cj = dernierCoup.col % 3;
+        if (estJouable(ci, cj)) {
+            for (int i = 0; i < 3; i++)
+                for (int j = 0; j < 3; j++)
+                    if (m_grille[ci*3+i][cj*3+j] == 0)
+                        coups.push_back({ci*3+i, cj*3+j});
+            libre = false;
         }
-        if (n1==2 && nM==0) score += 3000; // on gagne le sous-plateau sur la ligne
-        if (nM==2 && n1==0) score += 2500; // on bloque l'adversaire sur la ligne
-        if (n1==1 && nM==0) score += 50;
     }
-    // Colonne locale lj
-    {
-        int n1=0, nM=0;
-        for (int ii=0; ii<3; ii++) {
-            int v = g[dL+ii][dC+lj];
-            if (v== 1) n1++; else if (v==-1) nM++;
-        }
-        if (n1==2 && nM==0) score += 3000;
-        if (nM==2 && n1==0) score += 2500;
-        if (n1==1 && nM==0) score += 50;
-    }
-    // Diagonale principale (si applicable)
-    if (li == lj) {
-        int n1=0, nM=0;
-        for (int d=0; d<3; d++) {
-            int v = g[dL+d][dC+d];
-            if (v== 1) n1++; else if (v==-1) nM++;
-        }
-        if (n1==2 && nM==0) score += 3000;
-        if (nM==2 && n1==0) score += 2500;
-    }
-    // Anti-diagonale (si applicable)
-    if (li+lj == 2) {
-        int n1=0, nM=0;
-        for (int d=0; d<3; d++) {
-            int v = g[dL+d][dC+2-d];
-            if (v== 1) n1++; else if (v==-1) nM++;
-        }
-        if (n1==2 && nM==0) score += 3000;
-        if (nM==2 && n1==0) score += 2500;
+    if (libre) {
+        for (int si = 0; si < 3; si++)
+            for (int sj = 0; sj < 3; sj++)
+                if (estJouable(si, sj))
+                    for (int i = 0; i < 3; i++)
+                        for (int j = 0; j < 3; j++)
+                            if (m_grille[si*3+i][sj*3+j] == 0)
+                                coups.push_back({si*3+i, sj*3+j});
     }
 
-    // ---- Sous-plateau cible apres ce coup ----
-    // On envoie l'adversaire dans le sous-plateau (li, lj)
-    int siC = li, sjC = lj;
-    // Si ce sous-plateau est deja termine, l'adversaire joue partout -> neutre
-    if (e[siC][sjC] != 0) {
-        score += 100; // on lui donne la liberte, pas forcement mauvais
-    } else {
-        // Eviter d'envoyer dans le centre meta (trop fort pour l'adversaire)
-        if (siC==1 && sjC==1) score -= 200;
-        // Envoyer dans un coin meta = bon (coins sont strategiques)
-        if (siC%2==0 && sjC%2==0) score -= 80;
-    }
+    // Move ordering : critere principal = ou j'envoie l'adversaire
+    sort(coups.begin(), coups.end(), [this](const GameMove& a, const GameMove& b) {
+        auto score = [this](const GameMove& m) {
+            int s = 0;
+            int li = m.row % 3, ci = m.col % 3;
 
-    return score;
-}
+            // Position dans la sous-grille (centre > coin > bord)
+            if (li == 1 && ci == 1) s += 4;
+            else if (li % 2 == 0 && ci % 2 == 0) s += 2;
+            else s += 1;
 
-// ============================================================
-//  getCoupsLegaux : version publique avec tri (pour prochainMove)
-// ============================================================
-vector<GameMove> Plateau::getCoupsLegaux(const GameMove& last) {
-    GameMove buf[MAX_MOVES];
-    int n = getCoupsLegauxFast(last, buf);
-    vector<GameMove> coups(buf, buf+n);
-    sort(coups.begin(), coups.end(), [&](const GameMove& a, const GameMove& b) {
-        return scorerCoupRapide(a,m_g,m_e) > scorerCoupRapide(b,m_g,m_e);
+            // Sous-plateau cible (li, ci)
+            int cibleI = li, cibleJ = ci;
+
+            // MAUVAIS : envoyer en libre choix
+            if (m_etat[cibleI][cibleJ] != 0 || estPlein(cibleI, cibleJ))
+                s -= 8;
+
+            // BON : envoyer dans un sous-plateau ou l'adversaire est mal place
+            // (heuristique simple : on regarde l'eval locale)
+            else
+                s += POIDS_META[cibleI][cibleJ];
+
+            // Bonus si on joue dans un sous-plateau strategique
+            int monI = m.row / 3, monJ = m.col / 3;
+            s += POIDS_META[monI][monJ];
+
+            return s;
+        };
+        return score(a) > score(b);
     });
+
     return coups;
 }
 
 // ============================================================
-//  Heuristique d'evaluation
+//  Simulation (jouer / annuler sans toucher à l'état réel)
 // ============================================================
-static inline int scoreLigne(int a, int b, int c, int p) {
-    int nP = (a==p)+(b==p)+(c==p);
-    int nA = (a==-p)+(b==-p)+(c==-p);
-    if (nA > 0) return 0;
-    if (nP==3) return 100;
-    if (nP==2) return 10;
-    if (nP==1) return 1;
+
+int Plateau::simulerJouer(int row, int col, int joueur) {
+    m_grille[row][col] = joueur;
+    int si = row/3, sj = col/3;
+    int ancien = m_etat[si][sj];
+    if (ancien == 0) {
+        int g = gagnantSous(si, sj);
+        if (g != 0)      m_etat[si][sj] = g;
+        else if (estPlein(si, sj)) m_etat[si][sj] = 2;
+    }
+    return ancien;
+}
+
+void Plateau::simulerAnnuler(int row, int col, int ancienEtat) {
+    m_grille[row][col] = 0;
+    m_etat[row/3][col/3] = ancienEtat;
+}
+
+// ============================================================
+//  Évaluation
+// ============================================================
+
+// Score d'une ligne de 3 cases dans un sous-plateau
+int Plateau::scoreLigneSous(int a, int b, int c, int joueur) const {
+    int nJ = (a==joueur)  + (b==joueur)  + (c==joueur);
+    int nA = (a==-joueur) + (b==-joueur) + (c==-joueur);
+    if (nA > 0) return 0; // bloquée
+    if (nJ == 2) return 10;
+    if (nJ == 1) return 1;
     return 0;
 }
 
-int Plateau::urgenceMetaGrille(int joueur) {
-    static const int L[8][3][2] = {
-        {{0,0},{1,1},{2,2}},{{0,2},{1,1},{2,0}},
-        {{0,0},{0,1},{0,2}},{{1,0},{1,1},{1,2}},{{2,0},{2,1},{2,2}},
-        {{0,0},{1,0},{2,0}},{{0,1},{1,1},{2,1}},{{0,2},{1,2},{2,2}}
-    };
-    int count = 0;
-    for (auto& l : L) {
-        int nJ=0, nLib=0;
-        for (auto& p : l) {
-            int v = m_e[p[0]][p[1]];
-            if (v==joueur) nJ++; else if (v==0) nLib++;
-        }
-        if (nJ==2 && nLib==1) count++;
-    }
-    return count;
+int Plateau::scoreLigneMeta(int a, int b, int c, int joueur) const {
+    auto val = [&](int v) { return (v == 2) ? 0 : v; };
+    int va = val(a), vb = val(b), vc = val(c);
+    int nJ = (va==joueur)  + (vb==joueur)  + (vc==joueur);
+    int nA = (va==-joueur) + (vb==-joueur) + (vc==-joueur);
+    if (nA > 0 && nJ > 0) return 0;
+    if (nA > 0) return 0;
+    if (nJ == 3) return 10000; // ligne meta gagnee (devrait pas arriver vu gagnantMeta)
+    if (nJ == 2) return 80;    // menace serieuse
+    if (nJ == 1) return 12;
+    return 0;
 }
 
-// Poids strategique d'un sous-plateau (lignes meta encore gagnables)
-static int poidsStrategique(int si, int sj,
-                             const array<array<int,3>,3>& e, int joueur)
-{
-    static const int LI[8][3]={{0,1,2},{0,1,2},{0,0,0},{1,1,1},{2,2,2},{0,1,2},{0,1,2},{0,1,2}};
-    static const int LJ[8][3]={{0,0,0},{2,1,0},{0,1,2},{0,1,2},{0,1,2},{0,1,2},{1,1,1},{2,2,2}};
-    int poids = 1;
-    for (int l = 0; l < 8; l++) {
-        bool passe = false;
-        for (int k = 0; k < 3; k++) if (LI[l][k]==si && LJ[l][k]==sj) { passe=true; break; }
-        if (!passe) continue;
-        bool ok = true; int nJ = 0;
-        for (int k = 0; k < 3; k++) {
-            int v = e[LI[l][k]][LJ[l][k]];
-            if (v==-joueur) { ok=false; break; }
-            if (v==joueur) nJ++;
-        }
-        if (ok) poids += 1 + nJ*2;
+// Score local d'un sous-plateau non terminé
+int Plateau::evaluerSous(int si, int sj) const {
+    int dL = si*3, dC = sj*3;
+    int score = 0;
+    for (int joueur : {1, -1}) {
+        int s = 0;
+        // Diagonales
+        s += scoreLigneSous(m_grille[dL][dC], m_grille[dL+1][dC+1], m_grille[dL+2][dC+2], joueur);
+        s += scoreLigneSous(m_grille[dL][dC+2], m_grille[dL+1][dC+1], m_grille[dL+2][dC], joueur);
+        // Lignes
+        for (int i = 0; i < 3; i++)
+            s += scoreLigneSous(m_grille[dL+i][dC], m_grille[dL+i][dC+1], m_grille[dL+i][dC+2], joueur);
+        // Colonnes
+        for (int j = 0; j < 3; j++)
+            s += scoreLigneSous(m_grille[dL][dC+j], m_grille[dL+1][dC+j], m_grille[dL+2][dC+j], joueur);
+        score += joueur * s;
     }
-    return poids;
+    return score;
 }
 
-static const int BONUS_POS[3][3] = {{3,2,3},{2,5,2},{3,2,3}};
-
-int Plateau::evaluer() {
-    int v = gagnantMetaGrille();
-    if (v == 1)  return SCORE_VICTOIRE;
-    if (v == -1) return SCORE_DEFAITE;
+int Plateau::evaluer() const {
+    // 1. Fin de partie
+    int v = gagnantMeta();
+    if (v ==  1) return  100000;
+    if (v == -1) return -100000;
 
     int score = 0;
 
-    // 1. Alignements sur la meta-grille (tres important)
-    for (int p : {1, -1}) {
+    // 2. Sous-plateaux gagnes : tres gros bonus + position
+    for (int i = 0; i < 3; i++)
+        for (int j = 0; j < 3; j++) {
+            if (m_etat[i][j] ==  1) score += 80 + POIDS_META[i][j] * 15;
+            else if (m_etat[i][j] == -1) score -= 80 + POIDS_META[i][j] * 15;
+        }
+
+    // 3. Alignements sur la meta-grille (le critere DECISIF)
+    for (int joueur : {1, -1}) {
         int s = 0;
-        auto e = [&](int i,int j){ return m_e[i][j]; };
-        s += scoreLigne(e(0,0),e(1,1),e(2,2),p)*5;
-        s += scoreLigne(e(0,2),e(1,1),e(2,0),p)*5;
-        for (int i = 0; i < 3; i++) {
-            s += scoreLigne(e(i,0),e(i,1),e(i,2),p)*5;
-            s += scoreLigne(e(0,i),e(1,i),e(2,i),p)*5;
-        }
-        for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++)
-            if (m_e[i][j]==p) s += BONUS_POS[i][j];
-        score += p * s * 200;
+        auto e = [&](int i, int j) { return m_etat[i][j]; };
+        s += scoreLigneMeta(e(0,0), e(1,1), e(2,2), joueur);
+        s += scoreLigneMeta(e(0,2), e(1,1), e(2,0), joueur);
+        for (int i = 0; i < 3; i++)
+            s += scoreLigneMeta(e(i,0), e(i,1), e(i,2), joueur);
+        for (int j = 0; j < 3; j++)
+            s += scoreLigneMeta(e(0,j), e(1,j), e(2,j), joueur);
+        score += joueur * s;
     }
 
-    // 2. Urgence : menaces a 2 sur la meta
-    score += urgenceMetaGrille( 1) * 600;
-    score -= urgenceMetaGrille(-1) * 600;
-
-    // 3. Score local de chaque sous-plateau non termine
-    for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) {
-        if (m_e[i][j] != 0) continue;
-        int dL=i*3, dC=j*3;
-        for (int p : {1, -1}) {
-            int poids = poidsStrategique(i, j, m_e, p);
-            int s = 0;
-            s += scoreLigne(m_g[dL][dC],  m_g[dL+1][dC+1],m_g[dL+2][dC+2],p);
-            s += scoreLigne(m_g[dL][dC+2],m_g[dL+1][dC+1],m_g[dL+2][dC],  p);
-            for (int ii=0; ii<3; ii++) {
-                s += scoreLigne(m_g[dL+ii][dC],m_g[dL+ii][dC+1],m_g[dL+ii][dC+2],p);
-                s += scoreLigne(m_g[dL][dC+ii],m_g[dL+1][dC+ii],m_g[dL+2][dC+ii],p);
-            }
-            score += p * s * poids;
-        }
+    // 4. Detection fork meta : 2 lignes meta a 2-non-bloquees = quasi gagne
+    for (int joueur : {1, -1}) {
+        int menacesDoubles = 0;
+        auto e = [&](int i, int j) { return m_etat[i][j]; };
+        auto compte = [&](int a, int b, int c) {
+            int va = (a == 2) ? 0 : a;
+            int vb = (b == 2) ? 0 : b;
+            int vc = (c == 2) ? 0 : c;
+            int nJ = (va==joueur) + (vb==joueur) + (vc==joueur);
+            int nA = (va==-joueur) + (vb==-joueur) + (vc==-joueur);
+            if (nA == 0 && nJ == 2) menacesDoubles++;
+        };
+        compte(e(0,0), e(1,1), e(2,2));
+        compte(e(0,2), e(1,1), e(2,0));
+        for (int i = 0; i < 3; i++) compte(e(i,0), e(i,1), e(i,2));
+        for (int j = 0; j < 3; j++) compte(e(0,j), e(1,j), e(2,j));
+        if (menacesDoubles >= 2) score += joueur * 400;
     }
+
+    // 5. Score local de chaque sous-plateau encore ouvert
+    for (int si = 0; si < 3; si++)
+        for (int sj = 0; sj < 3; sj++)
+            if (m_etat[si][sj] == 0)
+                score += evaluerSous(si, sj) * POIDS_META[si][sj];
+
+    // 6. Bonus pour centre absolu et centres de sous-plateaux
+    //    (cases tres importantes car elles creent beaucoup de lignes)
+    if (m_grille[4][4] ==  1) score += 12;
+    if (m_grille[4][4] == -1) score -= 12;
 
     return score;
 }
 
 // ============================================================
-//  Minimax Alpha-Beta SANS allocation dynamique
-//  Le tri dans minimax utilise un tableau local (tri par insertion)
+//  Minimax avec Alpha-Bêta
 // ============================================================
-int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) {
-    if (tempsEcoule()) return evaluer();
 
-    int v = gagnantMetaGrille();
-    if (v ==  1) return SCORE_VICTOIRE + depth;
-    if (v == -1) return SCORE_DEFAITE  - depth;
-    if (depth == 0) return evaluer();
+int Plateau::minimax(GameMove dernierCoup, int profondeur,
+                     int alpha, int beta, int joueur,
+                     steady_clock::time_point deadline) {
 
-    GameMove buf[MAX_MOVES];
-    int n = getCoupsLegauxFast(last, buf);
-    if (n == 0) return evaluer();
+    // Timeout : on retourne l'évaluation statique
+    if (steady_clock::now() >= deadline)
+        return evaluer();
 
-    // Tri par insertion (zero allocation, efficace pour n <= ~20 coups typiques)
-    // On ne trie que si depth > 1 pour amortir le cout
-    if (depth > 1) {
-        int scores[MAX_MOVES];
-        for (int k = 0; k < n; k++) scores[k] = scorerCoupRapide(buf[k], m_g, m_e);
-        for (int k = 1; k < n; k++) {
-            GameMove cm = buf[k]; int cs = scores[k]; int kk = k-1;
-            while (kk >= 0 && scores[kk] < cs) {
-                buf[kk+1] = buf[kk]; scores[kk+1] = scores[kk]; kk--;
-            }
-            buf[kk+1] = cm; scores[kk+1] = cs;
-        }
-    }
+    // Fin de partie
+    int v = gagnantMeta();
+    if (v ==  1) return  90000 + profondeur; // victoire rapide = meilleure
+    if (v == -1) return -90000 - profondeur;
+
+    vector<GameMove> coups = coupsLegaux(dernierCoup);
+    if (coups.empty() || profondeur == 0)
+        return evaluer();
 
     if (joueur == 1) {
+        // Notre tour : maximiser
         int best = numeric_limits<int>::min();
-        for (int k = 0; k < n; k++) {
-            if (tempsEcoule()) break;
-            int anc = jouerCoup(buf[k].row, buf[k].col, 1);
-            int s   = minimax(buf[k], depth-1, alpha, beta, -1);
-            annulerCoup(buf[k].row, buf[k].col, anc);
-            if (s > best) best = s;
-            if (best > alpha) alpha = best;
-            if (beta <= alpha) break;
+        for (const GameMove& c : coups) {
+            if (steady_clock::now() >= deadline) break;
+            int ancien = simulerJouer(c.row, c.col, 1);
+            int s = minimax(c, profondeur-1, alpha, beta, -1, deadline);
+            simulerAnnuler(c.row, c.col, ancien);
+            best = max(best, s);
+            alpha = max(alpha, best);
+            if (beta <= alpha) break; // coupure
         }
         return best;
     } else {
+        // Tour adverse : minimiser
         int best = numeric_limits<int>::max();
-        for (int k = 0; k < n; k++) {
-            if (tempsEcoule()) break;
-            int anc = jouerCoup(buf[k].row, buf[k].col, -1);
-            int s   = minimax(buf[k], depth-1, alpha, beta, 1);
-            annulerCoup(buf[k].row, buf[k].col, anc);
-            if (s < best) best = s;
-            if (best < beta) beta = best;
-            if (beta <= alpha) break;
+        for (const GameMove& c : coups) {
+            if (steady_clock::now() >= deadline) break;
+            int ancien = simulerJouer(c.row, c.col, -1);
+            int s = minimax(c, profondeur-1, alpha, beta, 1, deadline);
+            simulerAnnuler(c.row, c.col, ancien);
+            best = min(best, s);
+            beta = min(beta, best);
+            if (beta <= alpha) break; // coupure
         }
         return best;
     }
 }
 
 // ============================================================
-//  Point d'entree : approfondissement iteratif
+//  Point d'entrée : approfondissement itératif
 // ============================================================
-void Plateau::prochainMove(GameMove& myMove, GameMove& lastMove) {
-    vector<GameMove> coups = getCoupsLegaux(lastMove); // tri initial
-    int n = (int)coups.size();
-    if (n == 0) return;
 
-    g_debut  = steady_clock::now();
-    myMove   = coups[0]; // meilleur par defaut (tri heuristique)
+void Plateau::choisirCoup(GameMove& out, const GameMove& dernierCoupAdverse) {
+    vector<GameMove> coups = coupsLegaux(dernierCoupAdverse);
+    if (coups.empty()) return;
 
-    for (int prof = 1; prof <= PROFONDEUR_MAX; prof++) {
-        if (tempsEcoule()) break;
+    // Raccourci 1 : coup gagnant immediat
+    for (const GameMove& c : coups) {
+        int ancien = const_cast<Plateau*>(this)->simulerJouer(c.row, c.col, 1);
+        int g = gagnantMeta();
+        const_cast<Plateau*>(this)->simulerAnnuler(c.row, c.col, ancien);
+        if (g == 1) { out = c; cerr << "[Direct] coup gagnant\n"; return; }
+    }
+    // Raccourci 2 : bloquer victoire adverse immediate
+    for (const GameMove& c : coups) {
+        int ancien = const_cast<Plateau*>(this)->simulerJouer(c.row, c.col, -1);
+        int g = gagnantMeta();
+        const_cast<Plateau*>(this)->simulerAnnuler(c.row, c.col, ancien);
+        if (g == -1) { out = c; cerr << "[Direct] blocage forcé\n"; return; }
+    }
+
+    // Deadline globale pour ce coup
+    auto debut    = steady_clock::now();
+    auto deadline = debut + milliseconds(TEMPS_MAX_MS);
+
+    out = coups[0]; // coup par défaut si timeout immédiat
+
+    // Approfondissement itératif : profondeur 1, 2, 3 ... PROF_MAX
+    for (int prof = 1; prof <= PROF_MAX; prof++) {
+        if (steady_clock::now() >= deadline) break;
 
         int bestScore = numeric_limits<int>::min();
-        int bestIdx   = 0;
-        bool complet  = true;
+        GameMove bestCoup = coups[0];
+        bool complet = true;
 
-        for (int k = 0; k < n; k++) {
-            if (tempsEcoule()) { complet = false; break; }
-            int anc = jouerCoup(coups[k].row, coups[k].col, 1);
-            int s   = minimax(coups[k], prof-1,
-                              numeric_limits<int>::min(),
-                              numeric_limits<int>::max(), -1);
-            annulerCoup(coups[k].row, coups[k].col, anc);
-            if (s > bestScore) { bestScore = s; bestIdx = k; }
+        for (const GameMove& c : coups) {
+            if (steady_clock::now() >= deadline) { complet = false; break; }
+            int ancien = simulerJouer(c.row, c.col, 1);
+            int s = minimax(c, prof-1,
+                            numeric_limits<int>::min(),
+                            numeric_limits<int>::max(),
+                            -1, deadline);
+            simulerAnnuler(c.row, c.col, ancien);
+            if (s > bestScore) { bestScore = s; bestCoup = c; }
         }
 
         if (complet) {
-            myMove = coups[bestIdx];
-            // Remonter le meilleur coup en tete pour la prochaine iteration
-            if (bestIdx > 0) swap(coups[0], coups[bestIdx]);
-            cerr << "[IDA] prof=" << prof << " score=" << bestScore << "\n";
+            out = bestCoup;
+            cerr << "[Minimax] prof=" << prof << " score=" << bestScore
+                 << " coup=(" << out.row << "," << out.col << ")\n";
         }
     }
 }

@@ -1,50 +1,51 @@
 #ifndef PLATEAU_H
 #define PLATEAU_H
 
-#include <array>
 #include <vector>
+#include <chrono>
 #include "main.h"
-
-static const int SCORE_VICTOIRE =  1000000;
-static const int SCORE_DEFAITE  = -1000000;
-static const int PROFONDEUR_MAX = 9;
-static const int MAX_MOVES      = 81; // au maximum 81 coups possibles
 
 class Plateau {
 public:
     Plateau();
-    ~Plateau();
 
-    int  getCase(int row, int col);
-    void setCase(int row, int col, int val);
-    std::array<std::array<int,3>,3> getEtat() const { return m_e; }
+    // --- Interface publique ---
+    void jouerIA(int row, int col);      // enregistre le coup adverse (-1)
+    void jouerNous(int row, int col);    // enregistre notre coup (+1)
+    void choisirCoup(GameMove& out, const GameMove& dernierCoupAdverse);
 
-    void affiche_plateau();
-    int  gagnant(int dL, int dC);
-    void verifPlateau();
-    bool estCondamne(int row, int col);
-    bool estPlein(int si, int sj);
-    int  gagnantMetaGrille();
-
-    // Interface publique (utilisee par main.cpp)
-    std::vector<GameMove> getCoupsLegaux(const GameMove& last);
-    void prochainMove(GameMove& myMove, GameMove& lastMove);
+    void afficher() const;
 
 private:
-    // Donnees : tableaux plats, pas de vector -> zero allocation dans minimax
-    std::array<std::array<int,9>,9> m_g; // grille 9x9
-    std::array<std::array<int,3>,3> m_e; // etat meta 3x3
+    // Grille 9x9 : 0=vide, 1=nous, -1=IA adverse
+    int m_grille[9][9];
+    // Etat des 9 sous-plateaux : 0=en cours, 1=on a gagne, -1=adverse gagne, 2=nul
+    int m_etat[3][3];
 
-    int  jouerCoup(int row, int col, int joueur);
-    void annulerCoup(int row, int col, int ancienEtat);
+    // --- Utilitaires ---
+    bool estJouable(int si, int sj) const;   // sous-plateau encore ouvert
+    bool estPlein(int si, int sj) const;
+    int  gagnantSous(int si, int sj) const;  // 1, -1, ou 0
+    int  gagnantMeta() const;                // 1, -1, ou 0
+    void mettreAJourEtat(int si, int sj);
 
-    // Version sans allocation : ecrit dans un buffer fourni
-    int getCoupsLegauxFast(const GameMove& last, GameMove buf[MAX_MOVES]);
+    // Retourne les coups légaux étant donné le dernier coup joué
+    std::vector<GameMove> coupsLegaux(const GameMove& dernierCoup) const;
 
-    int minimax(GameMove last, int depth, int alpha, int beta, int joueur);
+    // --- Simulation (pour minimax) ---
+    int  simulerJouer(int row, int col, int joueur); // retourne ancien etat sous-plateau
+    void simulerAnnuler(int row, int col, int ancienEtat);
 
-    int evaluer();
-    int urgenceMetaGrille(int joueur);
+    // --- Minimax ---
+    int minimax(GameMove dernierCoup, int profondeur,
+                int alpha, int beta, int joueur,
+                std::chrono::steady_clock::time_point deadline);
+
+    // --- Evaluation ---
+    int evaluer() const;
+    int scoreLigneMeta(int a, int b, int c, int joueur) const;
+    int scoreLigneSous(int a, int b, int c, int joueur) const;
+    int evaluerSous(int si, int sj) const;
 };
 
-#endif // PLATEAU_H
+#endif
