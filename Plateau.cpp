@@ -4,6 +4,8 @@
 #include <limits>
 #include <algorithm>
 #include <chrono>
+#include <cmath>
+#include <random>
 #include "Plateau.h"
 #include "main.h"
 
@@ -11,11 +13,27 @@ using namespace std;
 using namespace std::chrono;
 
 static const int TIMEOUT_MS = 350;
+#ifdef ACTIVER_MCTS
+static const bool UTILISER_MCTS = true;
+#else
+static const bool UTILISER_MCTS = false;
+#endif
+static const double MCTS_EXPLORATION = 1.41421356237;
 static time_point<steady_clock> g_debut;
 
 static bool tempsEcoule() {
     return duration_cast<milliseconds>(steady_clock::now() - g_debut).count() >= TIMEOUT_MS;
 }
+
+struct NoeudMCTS {
+    GameMove coup;
+    int parent;
+    int joueurATour;
+    int visites;
+    double scoreJoueur;
+    vector<int> enfants;
+    vector<GameMove> coupsNonExplores;
+};
 
 // ============================================================
 //  Constructeur
@@ -79,7 +97,7 @@ bool Plateau::estCondamne(int row, int col) {
     int si = row/3, sj = col/3;
     return m_e[si][sj] != 0 || estPlein(si, sj);
 }
-int Plateau::gagnantMetaGrille() {
+int Plateau::gagnantMetaGrille() const {
     for (int p : {1, -1}) {
         auto e = [&](int i, int j) { return m_e[i][j] == p; };
         if (e(0,0)&&e(1,1)&&e(2,2)) return p;
@@ -89,6 +107,28 @@ int Plateau::gagnantMetaGrille() {
             if (e(0,i)&&e(1,i)&&e(2,i)) return p;
         }
     }
+    return 0;
+}
+
+int Plateau::resultatPartie() const {
+    int gagnant = gagnantMetaGrille();
+    if (gagnant != 0) return gagnant;
+
+    int sousPlateauxJoueur = 0;
+    int sousPlateauxIA = 0;
+    bool resteSousPlateauOuvert = false;
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            if (m_e[i][j] == 1) sousPlateauxJoueur++;
+            else if (m_e[i][j] == -1) sousPlateauxIA++;
+            else if (m_e[i][j] == 0) resteSousPlateauOuvert = true;
+        }
+    }
+
+    if (resteSousPlateauOuvert) return PARTIE_CONTINUE;
+    if (sousPlateauxJoueur > sousPlateauxIA) return 1;
+    if (sousPlateauxIA > sousPlateauxJoueur) return -1;
     return 0;
 }
 
@@ -396,6 +436,11 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
 //  Point d'entree : approfondissement iteratif
 // ============================================================
 void Plateau::prochainMove(GameMove& myMove, GameMove& lastMove) {
+    if (UTILISER_MCTS) prochainMoveMCTS(myMove, lastMove);
+    else prochainMoveMinimax(myMove, lastMove);
+}
+
+void Plateau::prochainMoveMinimax(GameMove& myMove, GameMove& lastMove) {
     vector<GameMove> coups = getCoupsLegaux(lastMove); // tri initial
     int n = (int)coups.size();
     if (n == 0) return;
@@ -427,4 +472,136 @@ void Plateau::prochainMove(GameMove& myMove, GameMove& lastMove) {
             cerr << "[IDA] prof=" << prof << " score=" << bestScore << "\n";
         }
     }
+}
+
+void Plateau::prochainMoveMCTS(GameMove& myMove, GameMove& lastMove) {
+    GameMove coupsInitiaux[MAX_MOVES];
+    int nbCoups = getCoupsLegauxFast(lastMove, coupsInitiaux);
+    if (nbCoups == 0) return;
+
+    g_debut = steady_clock::now();
+    myMove = coupsInitiaux[0];
+
+    mt19937 generateur(chrono::steady_clock::now().time_since_epoch().count());
+    vector<NoeudMCTS> arbre;
+    arbre.reserve(20000);
+
+    NoeudMCTS racine;
+    racine.coup = {-1, -1};
+    racine.parent = -1;
+    racine.joueurATour = 1;
+    racine.visites = 0;
+    racine.scoreJoueur = 0.0;
+    racine.coupsNonExplores.assign(coupsInitiaux, coupsInitiaux + nbCoups);
+    arbre.push_back(racine);
+
+    int simulations = 0;
+
+    while (!tempsEcoule()) {
+        Plateau etat = *this;
+        int indiceNoeud = 0;
+        GameMove dernierCoup = lastMove;
+
+        while (arbre[indiceNoeud].coupsNonExplores.empty()
+               && !arbre[indiceNoeud].enfants.empty()
+               && etat.resultatPartie() == PARTIE_CONTINUE) {
+            int meilleur = arbre[indiceNoeud].enfants[0];
+            double meilleurScore = -numeric_limits<double>::infinity();
+
+            for (int enfant : arbre[indiceNoeud].enfants) {
+                if (arbre[enfant].visites == 0) {
+                    meilleur = enfant;
+                    break;
+                }
+
+                double tauxJoueur = arbre[enfant].scoreJoueur / arbre[enfant].visites;
+                double exploitation = (arbre[indiceNoeud].joueurATour == 1)
+                                      ? tauxJoueur
+                                      : 1.0 - tauxJoueur;
+                double exploration = MCTS_EXPLORATION
+                    * sqrt(log(max(1, arbre[indiceNoeud].visites)) / arbre[enfant].visites);
+                double score = exploitation + exploration;
+
+                if (score > meilleurScore) {
+                    meilleurScore = score;
+                    meilleur = enfant;
+                }
+            }
+
+            indiceNoeud = meilleur;
+            int joueurQuiJoue = -arbre[indiceNoeud].joueurATour;
+            etat.jouerCoup(arbre[indiceNoeud].coup.row, arbre[indiceNoeud].coup.col, joueurQuiJoue);
+            dernierCoup = arbre[indiceNoeud].coup;
+        }
+
+        if (!arbre[indiceNoeud].coupsNonExplores.empty()
+            && etat.resultatPartie() == PARTIE_CONTINUE) {
+            uniform_int_distribution<int> choix(0, (int)arbre[indiceNoeud].coupsNonExplores.size() - 1);
+            int indiceCoup = choix(generateur);
+            GameMove coup = arbre[indiceNoeud].coupsNonExplores[indiceCoup];
+            arbre[indiceNoeud].coupsNonExplores[indiceCoup] = arbre[indiceNoeud].coupsNonExplores.back();
+            arbre[indiceNoeud].coupsNonExplores.pop_back();
+
+            int joueur = arbre[indiceNoeud].joueurATour;
+            etat.jouerCoup(coup.row, coup.col, joueur);
+            dernierCoup = coup;
+
+            GameMove buf[MAX_MOVES];
+            int n = etat.getCoupsLegauxFast(dernierCoup, buf);
+
+            NoeudMCTS enfant;
+            enfant.coup = coup;
+            enfant.parent = indiceNoeud;
+            enfant.joueurATour = -joueur;
+            enfant.visites = 0;
+            enfant.scoreJoueur = 0.0;
+            enfant.coupsNonExplores.assign(buf, buf + n);
+
+            arbre.push_back(enfant);
+            arbre[indiceNoeud].enfants.push_back((int)arbre.size() - 1);
+            indiceNoeud = (int)arbre.size() - 1;
+        }
+
+        int resultat = etat.resultatPartie();
+        int joueurSimulation = arbre[indiceNoeud].joueurATour;
+
+        while (resultat == PARTIE_CONTINUE) {
+            GameMove buf[MAX_MOVES];
+            int n = etat.getCoupsLegauxFast(dernierCoup, buf);
+            if (n == 0) break;
+
+            uniform_int_distribution<int> choix(0, n - 1);
+            GameMove coup = buf[choix(generateur)];
+            etat.jouerCoup(coup.row, coup.col, joueurSimulation);
+            dernierCoup = coup;
+            joueurSimulation = -joueurSimulation;
+            resultat = etat.resultatPartie();
+        }
+
+        double score = 0.5;
+        if (resultat == 1) score = 1.0;
+        else if (resultat == -1) score = 0.0;
+
+        while (indiceNoeud != -1) {
+            arbre[indiceNoeud].visites++;
+            arbre[indiceNoeud].scoreJoueur += score;
+            indiceNoeud = arbre[indiceNoeud].parent;
+        }
+
+        simulations++;
+    }
+
+    if (!arbre[0].enfants.empty()) {
+        int meilleur = arbre[0].enfants[0];
+        for (int enfant : arbre[0].enfants) {
+            if (arbre[enfant].visites > arbre[meilleur].visites) meilleur = enfant;
+        }
+        myMove = arbre[meilleur].coup;
+    }
+
+    int tempsMs = (int)duration_cast<milliseconds>(steady_clock::now() - g_debut).count();
+    int simulationsSec = tempsMs > 0 ? simulations * 1000 / tempsMs : simulations;
+    cerr << "[MCTS] sims=" << simulations
+         << " sims/s=" << simulationsSec
+         << " temps_ms=" << tempsMs << "\n";
 }

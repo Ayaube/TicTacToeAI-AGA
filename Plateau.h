@@ -9,6 +9,7 @@ static const int SCORE_VICTOIRE =  1000000;
 static const int SCORE_DEFAITE  = -1000000;
 static const int PROFONDEUR_MAX = 9;
 static const int MAX_MOVES      = 81; // au maximum 81 coups possibles
+static const int PARTIE_CONTINUE = 99;
 
 class Plateau {
 public:
@@ -24,7 +25,8 @@ public:
     void verifPlateau();
     bool estCondamne(int row, int col);
     bool estPlein(int si, int sj);
-    int  gagnantMetaGrille();
+    int  gagnantMetaGrille() const;
+    int  resultatPartie() const;
 
     // Interface publique (utilisee par main.cpp)
     std::vector<GameMove> getCoupsLegaux(const GameMove& last);
@@ -43,6 +45,8 @@ private:
     int getCoupsLegauxFast(const GameMove& last, GameMove buf[MAX_MOVES]);
 
     int minimax(GameMove last, int depth, int alpha, int beta, int joueur);
+    void prochainMoveMinimax(GameMove& myMove, GameMove& lastMove);
+    void prochainMoveMCTS(GameMove& myMove, GameMove& lastMove);
 
     int evaluer();
     int urgenceMetaGrille(int joueur);
