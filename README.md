@@ -51,11 +51,10 @@ Ce fichier est **fourni par le professeur** et ne doit pas être modifié. Il d�
 
 ```cpp
 enum Level { EASY_1, EASY_2, MEDIUM_1, MEDIUM_2, HARD_1, HARD_2, VERY_HARD_1, VERY_HARD_2 };
-enum Mode  { DEBUG, ARENA };
+enum Mode  { ... };
 ```
 
 - `Level` : niveau de difficulté de l'adversaire simulé par le moteur.
-- `Mode::DEBUG` : affichage graphique du plateau (fenêtre Allegro).
 - `Mode::ARENA` : mode silencieux pour les campagnes de test automatisées.
 
 #### Structure `GameMove`
@@ -158,7 +157,6 @@ La convention de signe **+1 / -1** permet d'inverser la perspective sans branche
 |---|---|
 | `getCase(r,c)` / `setCase(r,c,v)` | Accès aux cellules de la grille |
 | `getEtat()` | Retourne la méta-grille |
-| `affiche_plateau()` | Affichage debug en console |
 | `gagnant(dL, dC)` | Vérifie si la sous-grille (dL,dC) est gagnée |
 | `verifPlateau()` | Met à jour la méta-grille après un coup |
 | `estCondamne(r,c)` | Vrai si la case ne peut plus changer le résultat |
@@ -197,7 +195,7 @@ Utilisée pour filtrer les coups dans la génération de coups légaux.
 
 ##### `jouerCoup(row, col, joueur)` / `annulerCoup(row, col)`
 
-Play/undo pour la recherche minimax. `annulerCoup` remet la case à `0` et relance `verifPlateau()` pour restaurer `m_e`.
+Ces deux fonctions servent à essayer un coup puis à revenir en arrière pendant la recherche.
 
 ---
 
@@ -227,7 +225,7 @@ Appelle `getCoupsLegauxFast`, puis trie les coups par score heuristique décrois
 
 #### 3. Heuristique de tri des coups (`scorerCoupRapide`)
 
-Évalue un coup **sans le jouer**, pour guider la recherche en explorant d'abord les coups prometteurs (move ordering).
+Évalue un coup **sans le jouer**, pour explorer d'abord les coups prometteurs.
 
 | Critère | Bonus |
 |---|---|
@@ -240,7 +238,7 @@ Appelle `getCoupsLegauxFast`, puis trie les coups par score heuristique décrois
 | Coup envoyant l'adversaire dans la sous-grille centrale | −500 (pénalité) |
 | Coup envoyant l'adversaire dans un coin | +150 |
 
-Le move ordering est crucial pour l'efficacité de l'alpha-beta : un bon tri peut réduire l'arbre exploré de **O(b^d)** à **O(b^(d/2))**.
+Le tri des coups aide l'alpha-beta à couper plus tôt les branches inutiles.
 
 ---
 
@@ -280,13 +278,13 @@ int minimax(GameMove last, int profondeur, int alpha, int beta, int joueur,
 - **Minimax** : le joueur `1` (IA) maximise le score, le joueur `-1` (adversaire) le minimise.
 - **Alpha-beta** : coupe les branches inutiles. `alpha` = meilleur score garanti pour le maximisant, `beta` = meilleur score garanti pour le minimisant. Si `alpha >= beta` → coupe (le branche ne sera jamais choisie).
 - **Limite de temps** : vérifié à chaque nœud via `std::chrono::steady_clock`. Budget : **350 ms** par coup.
-- **Tri interne** : les coups sont triés par score heuristique avant expansion (insertion sort, sans allocation dynamique).
-- **Conditions d'arrêt** : profondeur 0, état terminal, ou timeout.
+- **Tri interne** : les coups sont triés par score heuristique avant d'être testés.
+- **Conditions d'arrêt** : profondeur 0, état terminal, ou temps écoulé.
 
 Pseudo-code simplifié :
 ```
 minimax(last, profondeur, alpha, beta, joueur):
-    si temps écoulé ou profondeur == 0 ou état terminal:
+    si temps ecoule ou profondeur == 0 ou etat terminal:
         retourner evaluer(joueur)
     
     pour chaque coup légal (trié par heuristique):
@@ -295,7 +293,7 @@ minimax(last, profondeur, alpha, beta, joueur):
         annulerCoup(coup)
         
         alpha = max(alpha, score)
-        si alpha >= beta: break  // élagage
+        si alpha >= beta: break
     
     retourner alpha
 ```
@@ -315,7 +313,7 @@ C'est le **point d'entrée principal** appelé depuis `main.cpp` à chaque tour.
 ```
 pour profondeur de 1 à PROFONDEUR_MAX (9):
     lancer minimax à cette profondeur
-    si timeout pendant la recherche: arrêter
+    si le temps est ecoule: arreter
     mémoriser le meilleur coup trouvé
     utiliser l'ordre des coups de cette itération pour la suivante
 
@@ -340,19 +338,11 @@ g++ -std=c++17 -O2 -fno-lto main.cpp Plateau.cpp -L. -lUTTTLib \
     -o ia_soutenance.exe
 ```
 
-### Lancer une campagne (100 parties, MEDIUM_1, mode silencieux)
+### Lancer le programme
 
 ```bash
-ia_soutenance.exe arena med1 100 0 AGA
+ia_soutenance.exe
 ```
-
-### Lancer en mode debug (affichage graphique, 1 partie)
-
-```bash
-ia_soutenance.exe debug med1 1 0 AGA
-```
-
----
 
 ## Points clés à retenir pour la soutenance
 
@@ -361,6 +351,6 @@ ia_soutenance.exe debug med1 1 0 AGA
 | **Encapsulation** | La classe `Plateau` encapsule état + logique, `main.cpp` n'accède jamais directement à `m_g` |
 | **Abstraction** | `IGame` est une interface pure — notre code ne connaît pas les détails du moteur |
 | **Polymorphisme** | `game` est une référence vers `IGame`, l'implémentation est dans `libUTTTLib.a` |
-| **Performance** | Zéro allocation dynamique dans le chemin critique (pile uniquement) |
+| **Performance** | Les tableaux fixes évitent des allocations dans la recherche |
 | **Robustesse** | Budget temps de 350 ms garanti par `steady_clock` à chaque nœud |
-| **Qualité algo** | Minimax + alpha-beta + move ordering + approfondissement itératif |
+| **Qualité algo** | Minimax + alpha-beta + tri des coups + approfondissement itératif |

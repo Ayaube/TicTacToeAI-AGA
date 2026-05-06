@@ -43,4 +43,4 @@ struct IGame {
 
 extern IGame& game;
 
-#endif // MAIN_H_INCLUDED
+#endif

@@ -1,4 +1,3 @@
-#include <iostream>
 #include <array>
 #include <vector>
 #include <limits>
@@ -17,9 +16,6 @@ static bool tempsEcoule() {
     return duration_cast<milliseconds>(steady_clock::now() - g_debut).count() >= TIMEOUT_MS;
 }
 
-// ============================================================
-//  Constructeur
-// ============================================================
 Plateau::Plateau() {
     for (auto& r : m_g) r.fill(0);
     for (auto& r : m_e) r.fill(0);
@@ -29,16 +25,7 @@ Plateau::~Plateau() {}
 int  Plateau::getCase(int r, int c)          { return m_g[r][c]; }
 void Plateau::setCase(int r, int c, int val) { m_g[r][c] = val; }
 
-void Plateau::affiche_plateau() {
-    for (auto& row : m_g) {
-        for (int v : row) cout << v << " ";
-        cout << "\n";
-    }
-}
-
-// ============================================================
-//  Gagnant d'un sous-plateau (offset dL, dC)
-// ============================================================
+// Renvoie le gagnant d'un sous-plateau.
 int Plateau::gagnant(int dL, int dC) {
     for (int p : {1, -1}) {
         auto v = [&](int r, int c) { return m_g[dL+r][dC+c] == p; };
@@ -58,18 +45,13 @@ void Plateau::verifPlateau() {
         int r = gagnant(i*3, j*3);
         if (r) {
             m_e[i][j] = r;
-            cout << (r==1 ? "Joueur" : "IA")
-                 << " gagne sous-plateau (" << i << "," << j << ")\n";
         } else if (estPlein(i, j)) {
-            // 2 = sous-plateau termine sur un nul
+            // 2 signifie que le sous-plateau est nul.
             m_e[i][j] = 2;
         }
     }
 }
 
-// ============================================================
-//  Helpers
-// ============================================================
 bool Plateau::estPlein(int si, int sj) {
     for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++)
         if (m_g[si*3+i][sj*3+j] == 0) return false;
@@ -92,9 +74,7 @@ int Plateau::gagnantMetaGrille() {
     return 0;
 }
 
-// ============================================================
-//  Simulation
-// ============================================================
+// Sert a jouer puis annuler les coups pendant la recherche.
 int Plateau::jouerCoup(int row, int col, int joueur) {
     m_g[row][col] = joueur;
     int si = row/3, sj = col/3;
@@ -116,9 +96,7 @@ int Plateau::etatSousPlateau(int si, int sj) {
     return 0;
 }
 
-// ============================================================
-//  Coups legaux : version FAST (buffer, zero malloc)
-// ============================================================
+// Genere les coups possibles avec la regle du sous-plateau impose.
 int Plateau::getCoupsLegauxFast(const GameMove& last, GameMove buf[MAX_MOVES]) {
     int n = 0;
     bool valide = (last.row>=0 && last.row<9 && last.col>=0 && last.col<9);
@@ -140,10 +118,7 @@ int Plateau::getCoupsLegauxFast(const GameMove& last, GameMove buf[MAX_MOVES]) {
     return n;
 }
 
-// ============================================================
-//  Score rapide d'un coup pour le move ordering
-//  (pas de jouerCoup/annulerCoup -> pas de cout)
-// ============================================================
+// Donne une priorite aux coups avant de lancer minimax.
 static int scorerCoupRapide(const GameMove& c,
                               const array<array<int,9>,9>& g,
                               const array<array<int,3>,3>& e)
@@ -153,27 +128,23 @@ static int scorerCoupRapide(const GameMove& c,
     int li = c.row%3, lj = c.col%3;
     int dL = si*3, dC = sj*3;
 
-    // ---- Position locale ----
-    if (li==1 && lj==1)              score += 300; // centre local
-    else if (li%2==0 && lj%2==0)     score += 150; // coin local
+    if (li==1 && lj==1)              score += 300;
+    else if (li%2==0 && lj%2==0)     score += 150;
 
-    // ---- Position du sous-plateau dans la meta ----
-    if (si==1 && sj==1)              score += 200; // centre meta
-    else if (si%2==0 && sj%2==0)     score += 100; // coin meta
+    if (si==1 && sj==1)              score += 200;
+    else if (si%2==0 && sj%2==0)     score += 100;
 
-    // ---- Menaces locales (ligne, colonne, diagonales) ----
-    // Ligne locale li
+    // Les coups qui gagnent ou bloquent une ligne locale passent en premier.
     {
         int n1=0, nM=0;
         for (int jj=0; jj<3; jj++) {
             int v = g[dL+li][dC+jj];
             if (v== 1) n1++; else if (v==-1) nM++;
         }
-        if (n1==2 && nM==0) score += 3000; // on gagne le sous-plateau sur la ligne
-        if (nM==2 && n1==0) score += 2500; // on bloque l'adversaire sur la ligne
+        if (n1==2 && nM==0) score += 3000;
+        if (nM==2 && n1==0) score += 2500;
         if (n1==1 && nM==0) score += 50;
     }
-    // Colonne locale lj
     {
         int n1=0, nM=0;
         for (int ii=0; ii<3; ii++) {
@@ -184,7 +155,6 @@ static int scorerCoupRapide(const GameMove& c,
         if (nM==2 && n1==0) score += 2500;
         if (n1==1 && nM==0) score += 50;
     }
-    // Diagonale principale (si applicable)
     if (li == lj) {
         int n1=0, nM=0;
         for (int d=0; d<3; d++) {
@@ -194,7 +164,6 @@ static int scorerCoupRapide(const GameMove& c,
         if (n1==2 && nM==0) score += 3000;
         if (nM==2 && n1==0) score += 2500;
     }
-    // Anti-diagonale (si applicable)
     if (li+lj == 2) {
         int n1=0, nM=0;
         for (int d=0; d<3; d++) {
@@ -205,25 +174,19 @@ static int scorerCoupRapide(const GameMove& c,
         if (nM==2 && n1==0) score += 2500;
     }
 
-    // ---- Sous-plateau cible apres ce coup ----
-    // On envoie l'adversaire dans le sous-plateau (li, lj)
     int siC = li, sjC = lj;
-    // Si ce sous-plateau est deja termine, l'adversaire joue partout -> neutre
+
+    // On evite si possible d'envoyer l'adversaire dans une bonne zone.
     if (e[siC][sjC] != 0) {
-        score += 100; // on lui donne la liberte, pas forcement mauvais
+        score += 100;
     } else {
-        // Eviter d'envoyer dans le centre meta (trop fort pour l'adversaire)
         if (siC==1 && sjC==1) score -= 200;
-        // Envoyer dans un coin meta = bon (coins sont strategiques)
         if (siC%2==0 && sjC%2==0) score -= 80;
     }
 
     return score;
 }
 
-// ============================================================
-//  getCoupsLegaux : version publique avec tri (pour prochainMove)
-// ============================================================
 vector<GameMove> Plateau::getCoupsLegaux(const GameMove& last) {
     GameMove buf[MAX_MOVES];
     int n = getCoupsLegauxFast(last, buf);
@@ -234,9 +197,7 @@ vector<GameMove> Plateau::getCoupsLegaux(const GameMove& last) {
     return coups;
 }
 
-// ============================================================
-//  Heuristique d'evaluation
-// ============================================================
+// Evalue une position quand la recherche s'arrete.
 static inline int scoreLigne(int a, int b, int c, int p) {
     int nP = (a==p)+(b==p)+(c==p);
     int nA = (a==-p)+(b==-p)+(c==-p);
@@ -265,7 +226,7 @@ int Plateau::urgenceMetaGrille(int joueur) {
     return count;
 }
 
-// Poids strategique d'un sous-plateau (lignes meta encore gagnables)
+// Donne plus de poids aux sous-plateaux utiles pour gagner la meta-grille.
 static int poidsStrategique(int si, int sj,
                              const array<array<int,3>,3>& e, int joueur)
 {
@@ -296,7 +257,7 @@ int Plateau::evaluer() {
 
     int score = 0;
 
-    // 1. Alignements sur la meta-grille (tres important)
+    // Score des alignements sur la meta-grille.
     for (int p : {1, -1}) {
         int s = 0;
         auto e = [&](int i,int j){ return m_e[i][j]; };
@@ -311,11 +272,11 @@ int Plateau::evaluer() {
         score += p * s * 200;
     }
 
-    // 2. Urgence : menaces a 2 sur la meta
+    // Bonus ou malus si une ligne de meta-grille est presque gagnee.
     score += urgenceMetaGrille( 1) * 600;
     score -= urgenceMetaGrille(-1) * 600;
 
-    // 3. Score local de chaque sous-plateau non termine
+    // Score des sous-plateaux encore jouables.
     for (int i = 0; i < 3; i++) for (int j = 0; j < 3; j++) {
         if (m_e[i][j] != 0) continue;
         int dL=i*3, dC=j*3;
@@ -335,10 +296,7 @@ int Plateau::evaluer() {
     return score;
 }
 
-// ============================================================
-//  Minimax Alpha-Beta SANS allocation dynamique
-//  Le tri dans minimax utilise un tableau local (tri par insertion)
-// ============================================================
+// Recherche le meilleur coup avec minimax et l'elagage alpha-beta.
 int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) {
     if (tempsEcoule()) return evaluer();
 
@@ -351,8 +309,7 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
     int n = getCoupsLegauxFast(last, buf);
     if (n == 0) return evaluer();
 
-    // Tri par insertion (zero allocation, efficace pour n <= ~20 coups typiques)
-    // On ne trie que si depth > 1 pour amortir le cout
+    // Trie les coups pour tester les plus prometteurs d'abord.
     if (depth > 1) {
         int scores[MAX_MOVES];
         for (int k = 0; k < n; k++) scores[k] = scorerCoupRapide(buf[k], m_g, m_e);
@@ -392,16 +349,14 @@ int Plateau::minimax(GameMove last, int depth, int alpha, int beta, int joueur) 
     }
 }
 
-// ============================================================
-//  Point d'entree : approfondissement iteratif
-// ============================================================
+// Cherche progressivement tant qu'il reste du temps.
 void Plateau::prochainMove(GameMove& myMove, GameMove& lastMove) {
-    vector<GameMove> coups = getCoupsLegaux(lastMove); // tri initial
+    vector<GameMove> coups = getCoupsLegaux(lastMove);
     int n = (int)coups.size();
     if (n == 0) return;
 
     g_debut  = steady_clock::now();
-    myMove   = coups[0]; // meilleur par defaut (tri heuristique)
+    myMove   = coups[0];
 
     for (int prof = 1; prof <= PROFONDEUR_MAX; prof++) {
         if (tempsEcoule()) break;
@@ -422,9 +377,7 @@ void Plateau::prochainMove(GameMove& myMove, GameMove& lastMove) {
 
         if (complet) {
             myMove = coups[bestIdx];
-            // Remonter le meilleur coup en tete pour la prochaine iteration
             if (bestIdx > 0) swap(coups[0], coups[bestIdx]);
-            cerr << "[IDA] prof=" << prof << " score=" << bestScore << "\n";
         }
     }
 }
